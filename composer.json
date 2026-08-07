@@ -50,11 +50,6 @@
             "Kooditorm\\Hyperf\\Jwt\\": "src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "HyperfTest\\Hyperf\\Jwt\\": "tests/"
-        }
-    },
     "extra": {
         "hyperf": {
             "config": "Kooditorm\\Hyperf\\Jwt\\ConfigProvider"
