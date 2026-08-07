@@ -1,0 +1,72 @@
+{
+    "name": "kooditorm/hyperf-jwt",
+    "description": "A coroutine-friendly, fully-featured JWT package for Hyperf 3.1+ with blacklist, refresh token and multi-scene support.",
+    "license": "MIT",
+    "keywords": [
+        "hyperf",
+        "jwt",
+        "json-web-token",
+        "authentication",
+        "coroutine",
+        "php8"
+    ],
+    "authors": [
+        {
+            "name": "oswin.hu",
+            "role": "oswin-hu@gmail.com"
+        }
+    ],
+    "homepage": "https://github.com/Kooditorm/hyperf-jwt.git",
+    "support": {
+        "issues": "https://github.com/Kooditorm/hyperf-jwt/issues",
+        "source": "https://github.com/Kooditorm/hyperf-jwt"
+    },
+    "require": {
+        "php": ">=8.1",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "ext-hash": "*",
+        "hyperf/framework": "~3.1.0",
+        "hyperf/cache": "~3.1.0",
+        "hyperf/command": "~3.1.0",
+        "hyperf/collection": "~3.1.0",
+        "hyperf/stringable": "~3.1.0",
+        "psr/container": "^2.0|^3.0",
+        "psr/simple-cache": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "hyperf/testing": "~3.1.0",
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "mockery/mockery": "^1.6",
+        "phpstan/phpstan": "^1.10"
+    },
+    "suggest": {
+        "hyperf/cache": "Required for blacklist storage (included by default).",
+        "hyperf/http-server": "Required for the JwtAuthMiddleware.",
+        "hyperf/http-message": "Required for the JwtAuthMiddleware.",
+        "ext-sodium": "Optional, for EdDSA algorithm support in the future."
+    },
+    "autoload": {
+        "psr-4": {
+            "HyperfExt\\Jwt\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HyperfExt\\Jwt\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "hyperf": {
+            "config": "HyperfExt\\Jwt\\ConfigProvider"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --memory-limit 1024M",
+        "cs-fix": "php-cs-fixer fix $1"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

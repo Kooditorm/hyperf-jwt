@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         requireCoverageMetadata="false"
+         beStrictAboutCoverageMetadata="false"
+         beStrictAboutOutputDuringTests="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         failOnRisky="true"
+         failOnWarning="true">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>src/</directory>
+        </include>
+    </source>
+    <php>
+        <env name="JWT_SECRET" value="test-secret-key-for-phpunit-only-32bytes!!"/>
+        <env name="JWT_PUBLIC_KEY" value=""/>
+        <env name="JWT_PRIVATE_KEY" value=""/>
+        <env name="JWT_PASSPHRASE" value=""/>
+    </php>
+</phpunit>
