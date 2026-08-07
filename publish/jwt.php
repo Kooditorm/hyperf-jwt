@@ -14,6 +14,9 @@ declare(strict_types=1);
  *
  * Copy this file to `config/autoload/jwt.php` of your Hyperf application.
  */
+
+use Kooditorm\Hyperf\Jwt\Providers\NativeJwtProvider;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -111,6 +114,6 @@ return [
     |
     */
     'providers' => [
-        'jwt' => \Kooditorm\Hyperf\Jwt\Providers\NativeJwtProvider::class,
+        'jwt' => NativeJwtProvider::class,
     ],
 ];
