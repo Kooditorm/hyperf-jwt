@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Exceptions;
+namespace Kooditorm\Hyperf\Jwt\Exceptions;
 
 /**
  * Thrown when a token has been revoked (present in the blacklist).

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Validators;
+namespace Kooditorm\Hyperf\Jwt\Validators;
 
-use HyperfExt\Jwt\Exceptions\TokenInvalidException;
-use HyperfExt\Jwt\Token;
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenInvalidException;
+use Kooditorm\Hyperf\Jwt\Token;
 
 /**
  * Validates the structural format of a JWT token string.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Exceptions;
+namespace Kooditorm\Hyperf\Jwt\Exceptions;
 
 /**
  * Thrown when a token's `exp` claim is in the past.

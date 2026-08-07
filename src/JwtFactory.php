@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt;
+namespace Kooditorm\Hyperf\Jwt;
 
 use Hyperf\Cache\CacheFactory;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Contract\ContainerInterface;
-use HyperfExt\Jwt\Blacklist\Blacklist;
-use HyperfExt\Jwt\Blacklist\BlacklistStorage;
-use HyperfExt\Jwt\Claims\Factory as ClaimFactory;
-use HyperfExt\Jwt\Payload\PayloadValidator;
-use HyperfExt\Jwt\Providers\NativeJwtProvider;
-use HyperfExt\Jwt\Signers\Factory as SignerFactory;
+use Kooditorm\Hyperf\Jwt\Blacklist\Blacklist;
+use Kooditorm\Hyperf\Jwt\Blacklist\BlacklistStorage;
+use Kooditorm\Hyperf\Jwt\Claims\Factory as ClaimFactory;
+use Kooditorm\Hyperf\Jwt\Payload\PayloadValidator;
+use Kooditorm\Hyperf\Jwt\Providers\NativeJwtProvider;
+use Kooditorm\Hyperf\Jwt\Signers\Factory as SignerFactory;
 
 /**
  * Builds {@see JWT} instances from the application's `jwt` configuration.

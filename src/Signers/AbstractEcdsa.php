@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Signers;
+namespace Kooditorm\Hyperf\Jwt\Signers;
 
-use HyperfExt\Jwt\Exceptions\JWTException;
+use Kooditorm\Hyperf\Jwt\Exceptions\JWTException;
 
 /**
  * ECDSA signer base (ES256 / ES384).

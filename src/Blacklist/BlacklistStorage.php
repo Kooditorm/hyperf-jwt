@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Blacklist;
+namespace Kooditorm\Hyperf\Jwt\Blacklist;
 
 use Psr\SimpleCache\CacheInterface;
-use HyperfExt\Jwt\Contracts\StorageInterface;
+use Kooditorm\Hyperf\Jwt\Contracts\StorageInterface;
 
 /**
  * Blacklist storage backed by a PSR-16 cache (Hyperf cache driver).

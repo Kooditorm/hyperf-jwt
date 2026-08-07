@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt;
+namespace Kooditorm\Hyperf\Jwt;
 
-use HyperfExt\Jwt\Contracts\JWTSubject;
-use HyperfExt\Jwt\Payload\Payload;
-use HyperfExt\Jwt\Token;
+use Kooditorm\Hyperf\Jwt\Contracts\JWTSubject;
+use Kooditorm\Hyperf\Jwt\Payload\Payload;
+use Kooditorm\Hyperf\Jwt\Token;
 
 /**
  * Multi-scene JWT manager.

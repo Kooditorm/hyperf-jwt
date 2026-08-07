@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Contracts;
+namespace Kooditorm\Hyperf\Jwt\Contracts;
 
 /**
  * Contract for any user / subject model that can be authenticated via JWT.

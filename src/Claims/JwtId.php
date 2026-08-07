@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Claims;
+namespace Kooditorm\Hyperf\Jwt\Claims;
 
 /**
  * `jti` - JWT ID: provides a unique identifier for the JWT.

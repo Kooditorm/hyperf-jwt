@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Claims;
+namespace Kooditorm\Hyperf\Jwt\Claims;
 
 /**
  * `nbf` - Not Before: the time before which the JWT MUST NOT be accepted.

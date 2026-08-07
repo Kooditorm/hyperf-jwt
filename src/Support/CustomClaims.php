@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Support;
+namespace Kooditorm\Hyperf\Jwt\Support;
 
 /**
- * Helper trait for implementing {@see \HyperfExt\Jwt\Contracts\JWTSubject}.
+ * Helper trait for implementing {@see \Kooditorm\Hyperf\Jwt\Contracts\JWTSubject}.
  *
  * Provides a default (empty) `getJWTCustomClaims` so models only need to
  * implement `getJWTIdentifier`.

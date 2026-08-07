@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Middleware;
+namespace Kooditorm\Hyperf\Jwt\Middleware;
 
 use Hyperf\Context\Context;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface as HttpResponseInterface;
-use HyperfExt\Jwt\Contracts\JWTInterface;
-use HyperfExt\Jwt\Exceptions\JWTException;
+use Kooditorm\Hyperf\Jwt\Contracts\JWTInterface;
+use Kooditorm\Hyperf\Jwt\Exceptions\JWTException;
 use HyperfExt\Jwt\Token;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;

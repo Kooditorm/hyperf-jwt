@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Payload;
+namespace Kooditorm\Hyperf\Jwt\Payload;
 
-use HyperfExt\Jwt\Claims\Audience;
-use HyperfExt\Jwt\Exceptions\TokenExpiredException;
-use HyperfExt\Jwt\Exceptions\TokenInvalidException;
-use HyperfExt\Jwt\Exceptions\TokenNotYetValidException;
+use Kooditorm\Hyperf\Jwt\Claims\Audience;
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenExpiredException;
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenInvalidException;
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenNotYetValidException;
 
 /**
  * Validates the claims of a decoded payload against configured expectations

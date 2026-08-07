@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt;
+namespace Kooditorm\Hyperf\Jwt;
 
-use HyperfExt\Jwt\Blacklist\Blacklist;
-use HyperfExt\Jwt\Contracts\JWTProvider;
-use HyperfExt\Jwt\Exceptions\JWTException;
-use HyperfExt\Jwt\Exceptions\TokenBlacklistedException;
-use HyperfExt\Jwt\Exceptions\TokenInvalidException;
-use HyperfExt\Jwt\Payload\Payload;
-use HyperfExt\Jwt\Payload\PayloadValidator;
+use Kooditorm\Hyperf\Jwt\Blacklist\Blacklist;
+use Kooditorm\Hyperf\Jwt\Contracts\JWTProvider;
+use Kooditorm\Hyperf\Jwt\Exceptions\JWTException;
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenBlacklistedException;
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenInvalidException;
+use Kooditorm\Hyperf\Jwt\Payload\Payload;
+use Kooditorm\Hyperf\Jwt\Payload\PayloadValidator;
 
 /**
  * Core JWT engine — encode, decode, refresh, invalidate.
  *
- * This is the HyperfExt equivalent of tymon/jwt-auth's Manager. It operates
+ * This is the Kooditorm/Hyperf equivalent of tymon/jwt-auth's Manager. It operates
  * purely on Token / Payload value objects and is unaware of HTTP requests,
  * users, or the framework's auth system. The higher-level {@see JWT} class
  * extends this to add request parsing and subject authentication.

@@ -111,6 +111,6 @@ return [
     |
     */
     'providers' => [
-        'jwt' => \HyperfExt\Jwt\Providers\NativeJwtProvider::class,
+        'jwt' => \Kooditorm\Hyperf\Jwt\Providers\NativeJwtProvider::class,
     ],
 ];

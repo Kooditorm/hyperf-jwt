@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt;
+namespace Kooditorm\Hyperf\Jwt;
 
-use HyperfExt\Jwt\Contracts\JWTSubject;
-use HyperfExt\Jwt\Exceptions\JWTException;
-use HyperfExt\Jwt\Payload\Payload;
+use Kooditorm\Hyperf\Jwt\Contracts\JWTSubject;
+use Kooditorm\Hyperf\Jwt\Exceptions\JWTException;
+use Kooditorm\Hyperf\Jwt\Payload\Payload;
 
 /**
  * High-level JWT service for a single scene.

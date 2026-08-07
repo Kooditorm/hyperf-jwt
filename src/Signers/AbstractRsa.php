@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Signers;
+namespace Kooditorm\Hyperf\Jwt\Signers;
 
 /**
  * RSA signer base (RS256 / RS384 / RS512). Uses a public/private key pair.
@@ -15,7 +15,7 @@ abstract class AbstractRsa extends AbstractSigner
         $signature = '';
 
         if (! openssl_sign($payload, $signature, $key, $this->getOpensslAlgorithm())) {
-            throw new \HyperfExt\Jwt\Exceptions\JWTException(
+            throw new \Kooditorm\Hyperf\Jwt\Exceptions\JWTException(
                 sprintf('OpenSSL failed to sign with %s: %s', $this->getAlgorithm(), openssl_error_string() ?: 'unknown error')
             );
         }

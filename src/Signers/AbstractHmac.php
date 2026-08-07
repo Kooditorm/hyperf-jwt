@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Signers;
+namespace Kooditorm\Hyperf\Jwt\Signers;
 
 /**
  * HMAC signer base (HS256 / HS384 / HS512). Uses a shared secret.

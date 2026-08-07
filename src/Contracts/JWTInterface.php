@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Contracts;
+namespace Kooditorm\Hyperf\Jwt\Contracts;
 
-use HyperfExt\Jwt\Payload\Payload;
-use HyperfExt\Jwt\Token;
+use Kooditorm\Hyperf\Jwt\Payload\Payload;
+use Kooditorm\Hyperf\Jwt\Token;
 
 /**
  * The high-level JWT service: issue, parse, verify, refresh and revoke tokens.

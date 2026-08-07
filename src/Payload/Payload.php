@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Payload;
+namespace Kooditorm\Hyperf\Jwt\Payload;
 
 use ArrayAccess;
 use Countable;
-use HyperfExt\Jwt\Claims\AbstractClaim;
-use HyperfExt\Jwt\Contracts\ClaimInterface;
+use Kooditorm\Hyperf\Jwt\Claims\AbstractClaim;
+use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
 use OutOfBoundsException;
 
 /**

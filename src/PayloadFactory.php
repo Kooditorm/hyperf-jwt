@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt;
+namespace Kooditorm\Hyperf\Jwt;
 
-use HyperfExt\Jwt\Claims\Factory as ClaimFactory;
-use HyperfExt\Jwt\Payload\Payload;
+use Kooditorm\Hyperf\Jwt\Claims\Factory as ClaimFactory;
+use Kooditorm\Hyperf\Jwt\Payload\Payload;
 
 /**
  * Builds {@see Payload} instances by merging default registered claims with

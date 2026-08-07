@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Claims;
+namespace Kooditorm\Hyperf\Jwt\Claims;
 
 /**
  * `aud` - Audience: identifies the recipients that the JWT is intended for.

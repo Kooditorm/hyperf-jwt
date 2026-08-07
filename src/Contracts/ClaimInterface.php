@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Contracts;
+namespace Kooditorm\Hyperf\Jwt\Contracts;
 
 /**
  * A single JWT claim (e.g. `iss`, `exp`, `sub` or any custom claim).

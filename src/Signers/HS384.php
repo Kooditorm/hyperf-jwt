@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Signers;
+namespace Kooditorm\Hyperf\Jwt\Signers;
 
 class HS384 extends AbstractHmac
 {

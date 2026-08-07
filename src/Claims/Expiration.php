@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Claims;
+namespace Kooditorm\Hyperf\Jwt\Claims;
 
 /**
  * `exp` - Expiration Time: the time after which the JWT MUST NOT be accepted.

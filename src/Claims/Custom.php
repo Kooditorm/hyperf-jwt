@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Claims;
+namespace Kooditorm\Hyperf\Jwt\Claims;
 
 /**
  * A user-defined claim with no built-in validation rule.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Support;
+namespace Kooditorm\Hyperf\Jwt\Support;
 
-use HyperfExt\Jwt\Exceptions\TokenInvalidException;
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenInvalidException;
 use JsonException;
 
 /**

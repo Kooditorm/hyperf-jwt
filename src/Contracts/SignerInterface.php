@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Contracts;
+namespace Kooditorm\Hyperf\Jwt\Contracts;
 
 /**
  * Signs a JWT header.payload segment and verifies an existing signature.

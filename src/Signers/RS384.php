@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Signers;
+namespace Kooditorm\Hyperf\Jwt\Signers;
 
 class RS384 extends AbstractRsa
 {

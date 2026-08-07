@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Providers;
+namespace Kooditorm\Hyperf\Jwt\Providers;
 
 use HyperfExt\Jwt\Contracts\JWTProvider;
 use HyperfExt\Jwt\Contracts\SignerInterface;
@@ -28,6 +28,7 @@ class NativeJwtProvider implements JWTProvider
     protected ?SignerInterface $signer = null;
 
     /**
+     * @param SignerFactory $signerFactory
      * @param array{secret?:string,keys?:array{public?:?string,private?:?string,passphrase?:?string},algo?:string} $config
      */
     public function __construct(

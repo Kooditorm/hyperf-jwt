@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Contracts;
+namespace Kooditorm\Hyperf\Jwt\Contracts;
 
 /**
  * Key/value storage backend for the blacklist.

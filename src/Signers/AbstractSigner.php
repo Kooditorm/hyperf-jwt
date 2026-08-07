@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Signers;
+namespace Kooditorm\Hyperf\Jwt\Signers;
 
-use HyperfExt\Jwt\Contracts\SignerInterface;
-use HyperfExt\Jwt\Exceptions\JWTException;
+use Kooditorm\Hyperf\Jwt\Contracts\SignerInterface;
+use Kooditorm\Hyperf\Jwt\Exceptions\JWTException;
 
 /**
  * Shared key material for all signers.

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace HyperfExt\Jwt\Blacklist;
+namespace Kooditorm\Hyperf\Jwt\Blacklist;
 
-use HyperfExt\Jwt\Contracts\StorageInterface;
-use HyperfExt\Jwt\Exceptions\JWTException;
-use HyperfExt\Jwt\Payload\Payload;
+use Kooditorm\Hyperf\Jwt\Contracts\StorageInterface;
+use Kooditorm\Hyperf\Jwt\Exceptions\JWTException;
+use Kooditorm\Hyperf\Jwt\Payload\Payload;
 
 /**
  * Manages token revocation.
