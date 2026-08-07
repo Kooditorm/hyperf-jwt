@@ -1,41 +1,49 @@
 {
     "name": "kooditorm/hyperf-jwt",
-    "description": "A coroutine-friendly, fully-featured JWT package for Hyperf 3.1+ with blacklist, refresh token and multi-scene support.",
+    "description": "JSON Web Token Authentication for Hyperf, adapted from tymon/jwt-auth",
+    "keywords": ["auth", "authentication", "jwt", "hyperf", "json web token"],
+    "homepage": "https://github.com/kooditorm/hyperf-jwt",
     "license": "MIT",
-    "keywords": [
-        "hyperf",
-        "jwt",
-        "json-web-token",
-        "authentication",
-        "coroutine",
-        "php8"
-    ],
     "authors": [
         {
-            "name": "oswin.hu",
-            "role": "oswin-hu@gmail.com"
+            "name": "Sean Tymon",
+            "email": "tymon148@gmail.com",
+            "role": "Original Developer"
+        },
+        {
+            "name": "kooditorm",
+            "role": "Hyperf Adapter"
         }
     ],
-    "homepage": "https://github.com/Kooditorm/hyperf-jwt.git",
     "require": {
-        "php": ">=8.1",
-        "ext-json": "*",
-        "ext-openssl": "*",
-        "ext-hash": "*",
-        "hyperf/framework": "~3.1.0",
-        "hyperf/cache": "~3.1.0",
-        "hyperf/command": "~3.1.0",
-        "hyperf/collection": "~3.1.0",
-        "hyperf/stringable": "~3.1.0",
-        "psr/container": "^2.0|^3.0",
-        "psr/simple-cache": "^3.0"
+        "php": ">=8.0",
+        "hyperf/cache": "~3.1.0 || ~3.2.0",
+        "hyperf/collection": "~3.1.0 || ~3.2.0",
+        "hyperf/config": "~3.1.0 || ~3.2.0",
+        "hyperf/context": "~3.1.0 || ~3.2.0",
+        "hyperf/contract": "~3.1.0 || ~3.2.0",
+        "hyperf/framework": "~3.1.0 || ~3.2.0",
+        "hyperf/http-server": "~3.1.0 || ~3.2.0",
+        "hyperf/stringable": "~3.1.0 || ~3.2.0",
+        "hyperf/utils": "~3.1.0 || ~3.2.0",
+        "lcobucci/jwt": "^4.0 || ^5.0",
+        "nesbot/carbon": "^2.0 || ^3.0",
+        "psr/container": "^1.0 || ^2.0",
+        "psr/http-message": "^1.0 || ^2.0",
+        "psr/http-server": "^1.0",
+        "psr/simple-cache": "^1.0 || ^3.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.0",
-        "hyperf/testing": "~3.1.0",
         "friendsofphp/php-cs-fixer": "^3.0",
-        "mockery/mockery": "^1.6",
-        "phpstan/phpstan": "^1.10"
+        "hyperf/testing": "~3.1.0 || ~3.2.0",
+        "mockery/mockery": "^1.0",
+        "phpstan/phpstan": "^1.0",
+        "phpunit/phpunit": "^9.5 || ^10.0",
+        "swoole/ide-helper": "dev-master"
+    },
+    "suggest": {
+        "hyperf/database": "Required to use the default HyperfAuth provider with Eloquent models",
+        "hyperf/redis": "Required to use Redis as blacklist storage"
     },
     "autoload": {
         "psr-4": {
@@ -44,12 +52,22 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Kooditorm\\Hyperf\\Jwt\\Tests\\": "tests/"
+            "HyperfTest\\Hyperf\\Jwt\\": "tests/"
         }
     },
     "extra": {
         "hyperf": {
             "config": "Kooditorm\\Hyperf\\Jwt\\ConfigProvider"
         }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev",
+    "scripts": {
+        "test": "phpunit --colors=always",
+        "analyse": "phpstan analyse --memory-limit 1024M",
+        "cs-fix": "php-cs-fixer fix $1"
     }
 }

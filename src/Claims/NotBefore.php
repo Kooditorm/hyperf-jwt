@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Claims;
 
-/**
- * `nbf` - Not Before: the time before which the JWT MUST NOT be accepted.
- */
-class NotBefore extends AbstractClaim
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenInvalidException;
+
+class NotBefore extends Claim
 {
+    use DatetimeTrait;
+
     protected string $name = 'nbf';
 
-    public function validate(mixed $value): bool
+    public function validatePayload(): mixed
     {
-        if (! is_numeric($value)) {
-            return false;
+        if ($this->isFuture((int) $this->getValue())) {
+            throw new TokenInvalidException('Token not yet valid');
         }
 
-        return (int) $value <= (time() + $this->leeway);
+        return $this->getValue();
     }
 }

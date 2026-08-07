@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Claims;
 
-/**
- * `jti` - JWT ID: provides a unique identifier for the JWT.
- *
- * Used primarily for blacklist keying / revocation.
- */
-class JwtId extends AbstractClaim
+use Hyperf\Stringable\Str;
+
+class JwtId extends Claim
 {
     protected string $name = 'jti';
 
-    public function validate(mixed $value): bool
+    public function validateCreate(mixed $value): mixed
     {
-        return $value === $this->getValue();
+        if ($value === null || $value === '') {
+            return Str::random(16);
+        }
+
+        return $value;
     }
 }

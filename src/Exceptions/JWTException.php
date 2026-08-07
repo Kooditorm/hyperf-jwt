@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Exceptions;
 
-use RuntimeException;
+use Exception;
 
-/**
- * Base exception for all JWT errors.
- */
-class JWTException extends RuntimeException
+class JWTException extends Exception
 {
+    protected $message = 'An error occurred';
 }

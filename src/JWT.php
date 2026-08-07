@@ -4,209 +4,291 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt;
 
+use BadMethodCallException;
+use Hyperf\Context\Context;
+use Psr\Http\Message\ServerRequestInterface;
 use Kooditorm\Hyperf\Jwt\Contracts\JWTSubject;
 use Kooditorm\Hyperf\Jwt\Exceptions\JWTException;
-use Kooditorm\Hyperf\Jwt\Payload\Payload;
+use Kooditorm\Hyperf\Jwt\Http\Parser\Parser;
+use Kooditorm\Hyperf\Jwt\Support\CustomClaims;
 
-/**
- * High-level JWT service for a single scene.
- *
- * Extends {@see Manager} (the core engine) with request-parsing and
- * subject-authentication features — the HyperfExt equivalent of
- * tymon/jwt-auth's JWTAuth.
- *
- * One instance == one scene. Use {@see JwtManager} to obtain instances
- * for multiple scenes.
- *
- * Typical usage in a controller:
- *
- *     $jwt = $manager->scene('api');
- *     $token = $jwt->fromSubject($user);
- *     $payload = $jwt->parseToken()->getPayload();
- *     $user = $jwt->subject();
- */
-class JWT extends Manager
+class JWT
 {
-    /**
-     * The currently-parsed token (set by parseToken / setToken).
-     */
-    protected ?Token $token = null;
+    use CustomClaims;
+
+    protected Manager $manager;
+
+    protected Parser $parser;
+
+    protected bool $lockSubject = true;
 
     /**
-     * Callable that resolves a subject from a `sub` claim value.
-     *
-     * @var callable(mixed): ?JWTSubject
+     * Context key for storing the current token (coroutine-safe).
      */
-    protected $subjectResolver = null;
+    protected string $tokenContextKey = 'kooditorm.jwt.token';
 
-    // ─── Subject-based token creation ───────────────────────────────────────
-
-    /**
-     * Create a Token from a JWTSubject (user model).
-     *
-     * The subject's identifier is stored in the `sub` claim, and any custom
-     * claims returned by `getJWTCustomClaims()` are merged in.
-     */
-    public function fromSubject(JWTSubject $subject): Token
+    public function __construct(Manager $manager, Parser $parser)
     {
-        $customClaims = $subject->getJWTCustomClaims();
-        $customClaims['sub'] = $subject->getJWTIdentifier();
-
-        return $this->encodeFromClaims($customClaims);
+        $this->manager = $manager;
+        $this->parser = $parser;
     }
 
     /**
-     * Alias for {@see fromSubject()}.
+     * Generate a token for a given subject.
      */
-    public function fromUser(JWTSubject $subject): Token
+    public function fromSubject(JWTSubject $subject): string
     {
-        return $this->fromSubject($subject);
+        $payload = $this->makePayload($subject);
+
+        return $this->manager->encode($payload)->get();
     }
 
-    // ─── Subject resolution ─────────────────────────────────────────────────
+    /**
+     * Alias to generate a token for a given user.
+     */
+    public function fromUser(JWTSubject $user): string
+    {
+        return $this->fromSubject($user);
+    }
 
     /**
-     * Set the callable used to resolve a subject from the `sub` claim.
-     *
-     *     $jwt->setSubjectResolver(fn ($id) => UserRepository::find($id));
+     * Refresh an expired token.
      */
-    public function setSubjectResolver(callable $resolver): static
+    public function refresh(bool $forceForever = false, bool $resetClaims = false): string
     {
-        $this->subjectResolver = $resolver;
+        $this->requireToken();
+
+        return $this->manager
+            ->customClaims($this->getCustomClaims())
+            ->refresh($this->token(), $forceForever, $resetClaims)
+            ->get();
+    }
+
+    /**
+     * Invalidate a token (add it to the blacklist).
+     */
+    public function invalidate(bool $forceForever = false): static
+    {
+        $this->requireToken();
+
+        $this->manager->invalidate($this->token(), $forceForever);
 
         return $this;
     }
 
     /**
-     * Resolve and return the subject indicated by the current token.
-     *
-     * Requires that {@see setSubjectResolver()} has been called.
+     * Alias to get the payload, and as a result checks that
+     * the token is valid i.e. not expired or blacklisted.
      */
-    public function subject(): ?JWTSubject
+    public function checkOrFail(): Payload
     {
-        if ($this->token === null) {
-            throw new JWTException('A token must be set before resolving the subject.');
-        }
-
-        if ($this->subjectResolver === null) {
-            throw new JWTException('No subject resolver has been configured.');
-        }
-
-        $payload = $this->decode($this->token);
-
-        if (! $payload->has('sub')) {
-            return null;
-        }
-
-        return ($this->subjectResolver)($payload->value('sub'));
+        return $this->getPayload();
     }
 
     /**
-     * Alias for {@see subject()}.
+     * Check that the token is valid.
      */
-    public function user(): ?JWTSubject
+    public function check(bool $getPayload = false): Payload|bool
     {
-        return $this->subject();
-    }
+        try {
+            $payload = $this->checkOrFail();
+        } catch (JWTException) {
+            return false;
+        }
 
-    // ─── Token state management ─────────────────────────────────────────────
-
-    /**
-     * Set the token to operate on (chainable).
-     */
-    public function setToken(Token|string $token): static
-    {
-        $this->token = Token::from($token);
-
-        return $this;
+        return $getPayload ? $payload : true;
     }
 
     /**
-     * Get the currently-set Token, or null.
+     * Get the token.
      */
     public function getToken(): ?Token
     {
-        return $this->token;
-    }
+        $token = Context::get($this->tokenContextKey);
 
-    /**
-     * Get the Payload of the currently-set Token.
-     */
-    public function getPayload(): Payload
-    {
-        if ($this->token === null) {
-            throw new JWTException('A token must be set before calling getPayload().');
-        }
-
-        return $this->decode($this->token);
-    }
-
-    // ─── Token parsing (request extraction) ────────────────────────────────
-
-    /**
-     * Parse the token from a raw header string or query parameter.
-     *
-     * Call this when you have the raw Authorization header value, e.g.:
-     *
-     *     $jwt->parseToken($request->getHeaderLine('Authorization'));
-     *
-     * Returns `$this` for chaining or false when no token is found.
-     */
-    public function parseToken(?string $bearer = null): static|false
-    {
-        $token = null;
-
-        if ($bearer !== null && $bearer !== '') {
-            // Accept "Bearer <token>" or a bare token string.
-            if (preg_match('/Bearer\s+(.*)$/i', $bearer, $matches)) {
-                $token = trim($matches[1]);
-            } elseif (strpos($bearer, '.') !== false) {
-                $token = trim($bearer);
+        if ($token === null) {
+            try {
+                $this->parseToken();
+            } catch (JWTException) {
+                Context::set($this->tokenContextKey, null);
             }
         }
 
-        if ($token === null || $token === '') {
-            return false;
+        return Context::get($this->tokenContextKey);
+    }
+
+    /**
+     * Parse the token from the request.
+     */
+    public function parseToken(): static
+    {
+        if (! $token = $this->parser->parseToken()) {
+            throw new JWTException('The token could not be parsed from the request');
         }
 
         return $this->setToken($token);
     }
 
     /**
-     * Invalidate the currently-set or given token (convenience).
+     * Get the raw Payload instance.
      */
-    public function invalidate(Token|string|null $token = null): bool
+    public function getPayload(): Payload
     {
-        $token ??= $this->token;
+        $this->requireToken();
 
-        if ($token === null) {
-            throw new JWTException('No token to invalidate.');
-        }
-
-        return parent::invalidate($token);
+        return $this->manager->decode($this->token());
     }
 
     /**
-     * Refresh the currently-set or given token (convenience).
+     * Alias for getPayload().
      */
-    public function refresh(Token|string|null $token = null): Token
+    public function payload(): Payload
     {
-        $token ??= $this->token;
-
-        if ($token === null) {
-            throw new JWTException('No token to refresh.');
-        }
-
-        return parent::refresh($token);
+        return $this->getPayload();
     }
 
     /**
-     * Reset the token state (clears the internally-parsed token).
+     * Convenience method to get a claim value.
      */
-    public function reset(): static
+    public function getClaim(string $claim): mixed
     {
-        $this->token = null;
+        return $this->payload()->get($claim);
+    }
+
+    /**
+     * Create a Payload instance.
+     */
+    public function makePayload(JWTSubject $subject): Payload
+    {
+        return $this->factory()
+            ->customClaims($this->getClaimsArray($subject))
+            ->make();
+    }
+
+    /**
+     * Build the claims array and return it.
+     */
+    protected function getClaimsArray(JWTSubject $subject): array
+    {
+        return array_merge(
+            $this->getClaimsForSubject($subject),
+            $subject->getJWTCustomClaims(),
+            $this->customClaims
+        );
+    }
+
+    protected function getClaimsForSubject(JWTSubject $subject): array
+    {
+        $claims = ['sub' => $subject->getJWTIdentifier()];
+
+        if ($this->lockSubject) {
+            $claims['prv'] = $this->hashSubjectModel($subject);
+        }
+
+        return $claims;
+    }
+
+    protected function hashSubjectModel(object|string $model): string
+    {
+        return sha1(is_object($model) ? get_class($model) : $model);
+    }
+
+    /**
+     * Check if the subject model matches the one saved in the token.
+     */
+    public function checkSubjectModel(object|string $model): bool
+    {
+        if (($prv = $this->payload()->get('prv')) === null) {
+            return true;
+        }
+
+        return $this->hashSubjectModel($model) === $prv;
+    }
+
+    /**
+     * Set the token (stored in coroutine context for safety).
+     */
+    public function setToken(Token|string $token): static
+    {
+        $token = $token instanceof Token ? $token : new Token($token);
+        Context::set($this->tokenContextKey, $token);
 
         return $this;
+    }
+
+    /**
+     * Unset the current token.
+     */
+    public function unsetToken(): static
+    {
+        Context::set($this->tokenContextKey, null);
+
+        return $this;
+    }
+
+    protected function requireToken(): void
+    {
+        if (! Context::get($this->tokenContextKey)) {
+            throw new JWTException('A token is required');
+        }
+    }
+
+    /**
+     * Get the current token from context.
+     */
+    protected function token(): Token
+    {
+        return Context::get($this->tokenContextKey);
+    }
+
+    /**
+     * Set the request instance for the parser.
+     */
+    public function setRequest(ServerRequestInterface $request): static
+    {
+        $this->parser->setRequest($request);
+
+        return $this;
+    }
+
+    public function lockSubject(bool $lock): static
+    {
+        $this->lockSubject = $lock;
+
+        return $this;
+    }
+
+    public function isLockSubject(): bool
+    {
+        return $this->lockSubject;
+    }
+
+    public function manager(): Manager
+    {
+        return $this->manager;
+    }
+
+    public function parser(): Parser
+    {
+        return $this->parser;
+    }
+
+    public function factory(): Factory
+    {
+        return $this->manager->getPayloadFactory();
+    }
+
+    public function blacklist(): Blacklist
+    {
+        return $this->manager->getBlacklist();
+    }
+
+    public function __call(string $method, array $parameters): mixed
+    {
+        if (method_exists($this->manager, $method)) {
+            return call_user_func_array([$this->manager, $method], $parameters);
+        }
+
+        throw new BadMethodCallException("Method [{$method}] does not exist.");
     }
 }

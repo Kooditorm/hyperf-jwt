@@ -5,48 +5,26 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Jwt\Validators;
 
 use Kooditorm\Hyperf\Jwt\Exceptions\TokenInvalidException;
-use Kooditorm\Hyperf\Jwt\Token;
 
-/**
- * Validates the structural format of a JWT token string.
- *
- * Mirrors tymon/jwt-auth's TokenValidator — performs a lightweight format
- * check before the token is handed to the JWTProvider for cryptographic
- * verification. This allows early rejection of obviously malformed input.
- */
-class TokenValidator
+class TokenValidator extends Validator
 {
-    /**
-     * Validate that the token string looks like a compact-serialisation JWT.
-     *
-     * @throws TokenInvalidException
-     */
-    public function check(Token|string $token): Token
+    public function check($value): string
     {
-        $token = Token::from($token);
-        $value = $token->get();
+        return $this->validateStructure($value);
+    }
 
-        if ($value === '') {
-            throw new TokenInvalidException('Token is empty.');
+    protected function validateStructure(string $token): string
+    {
+        $parts = explode('.', $token);
+
+        if (count($parts) !== 3) {
+            throw new TokenInvalidException('Wrong number of segments');
         }
 
-        $segments = explode('.', $value);
+        $parts = array_filter(array_map('trim', $parts));
 
-        if (count($segments) !== 3) {
-            throw new TokenInvalidException('Wrong number of token segments; expected 3.');
-        }
-
-        foreach ($segments as $i => $segment) {
-            if ($segment === '') {
-                throw new TokenInvalidException(sprintf('Token segment #%d is empty.', $i));
-            }
-        }
-
-        // base64url characters only: [A-Za-z0-9_-]
-        foreach ($segments as $segment) {
-            if (! preg_match('/^[A-Za-z0-9_-]+$/', $segment)) {
-                throw new TokenInvalidException('Token contains invalid base64url characters.');
-            }
+        if (count($parts) !== 3 || implode('.', $parts) !== $token) {
+            throw new TokenInvalidException('Malformed token');
         }
 
         return $token;

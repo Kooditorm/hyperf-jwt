@@ -4,176 +4,183 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Claims;
 
-use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
+use Hyperf\HttpServer\Contract\RequestInterface;
+use Psr\Container\ContainerInterface;
+use Kooditorm\Hyperf\Jwt\Support\Utils;
 
-/**
- * Builds the full set of claims for a token, merging sensible defaults
- * (iat, exp, nbf, jti, optional iss/aud) with any user-supplied claims.
- */
 class Factory
 {
     /**
-     * Mapping of registered-claim name => claim class.
+     * The container for resolving the request per-coroutine.
      */
-    protected array $classMap = [
-        'iss' => Issuer::class,
-        'sub' => Subject::class,
+    protected ContainerInterface $container;
+
+    /**
+     * The configured issuer string, or null to auto-detect from request.
+     */
+    protected ?string $issuer = null;
+
+    /**
+     * The TTL in minutes.
+     */
+    protected ?int $ttl = 60;
+
+    /**
+     * Time leeway in seconds.
+     */
+    protected int $leeway = 0;
+
+    /**
+     * The classes map for built-in claims.
+     */
+    private array $classMap = [
         'aud' => Audience::class,
         'exp' => Expiration::class,
-        'nbf' => NotBefore::class,
         'iat' => IssuedAt::class,
+        'iss' => Issuer::class,
         'jti' => JwtId::class,
+        'nbf' => NotBefore::class,
+        'sub' => Subject::class,
     ];
 
-    /**
-     * Default claim configuration from the active scene.
-     *
-     * @var array{iss?: string|null, aud?: mixed, exp?: int, nbf?: int, jti?: bool}
-     */
-    protected array $config;
-
-    protected int $leeway;
-
-    /**
-     * @param array $claimsConfig Scene `claims` config block
-     * @param int   $leeway       Clock-skew tolerance in seconds
-     */
-    public function __construct(array $claimsConfig, int $leeway = 0)
+    public function __construct(ContainerInterface $container)
     {
-        $this->config = $claimsConfig;
-        $this->leeway = $leeway;
+        $this->container = $container;
     }
 
     /**
-     * Build the complete claim set.
-     *
-     * @param array<string,mixed|ClaimInterface> $customClaims
-     *
-     * @return array<string,AbstractClaim>
+     * Get the instance of the claim when passing the name and value.
      */
-    public function build(array $customClaims = []): array
+    public function get(string $name, mixed $value): Claim
     {
-        $claims = $this->buildDefaultClaims();
+        if ($this->has($name)) {
+            $claim = new $this->classMap[$name]($value);
 
-        foreach ($customClaims as $name => $value) {
-            $claims[$name] = $this->normalize($name, $value);
+            return method_exists($claim, 'setLeeway')
+                ? $claim->setLeeway($this->leeway)
+                : $claim;
         }
 
-        return $claims;
+        return new Custom($name, $value);
     }
 
     /**
-     * Instantiate a claim object for a name/value pair.
+     * Check whether the claim name is a built-in claim.
      */
-    public function make(string $name, mixed $value): AbstractClaim
+    public function has(string $name): bool
     {
-        return $this->normalize($name, $value);
+        return array_key_exists($name, $this->classMap);
     }
 
     /**
-     * Produce the default registered claims based on the scene config.
-     *
-     * @return array<string,AbstractClaim>
+     * Generate the initial value and return the Claim instance.
      */
-    protected function buildDefaultClaims(): array
+    public function make(string $name): Claim
     {
-        $now = time();
-        $claims = [];
-
-        // iat - always set to now.
-        $claims['iat'] = $this->normalize('iat', $now);
-
-        // exp - config is a TTL in seconds relative to now.
-        $expTtl = (int) ($this->config['exp'] ?? 3600);
-        if ($expTtl > 0) {
-            $claims['exp'] = $this->normalize('exp', $now + $expTtl);
-        }
-
-        // nbf - config is a delay in seconds relative to now.
-        $nbfDelay = (int) ($this->config['nbf'] ?? 0);
-        if ($nbfDelay > 0) {
-            $claims['nbf'] = $this->normalize('nbf', $now + $nbfDelay);
-        }
-
-        // iss - optional issuer.
-        if (($this->config['iss'] ?? null) !== null) {
-            $claims['iss'] = $this->normalize('iss', $this->config['iss']);
-        }
-
-        // aud - optional audience.
-        if (($this->config['aud'] ?? null) !== null) {
-            $claims['aud'] = $this->normalize('aud', $this->config['aud']);
-        }
-
-        // jti - unique token id (used for blacklisting).
-        if ($this->config['jti'] ?? true) {
-            $claims['jti'] = $this->normalize('jti', $this->generateJti());
-        }
-
-        return $claims;
+        return $this->get($name, $this->{$name}());
     }
 
     /**
-     * Normalize a raw value (or existing claim) into a configured claim instance.
+     * Get the Issuer (iss) claim.
+     * Uses configured issuer, or falls back to the request URL.
      */
-    protected function normalize(string $name, mixed $value): AbstractClaim
+    public function iss(): string
     {
-        if ($value instanceof AbstractClaim) {
-            return $value->withLeeway($this->leeway);
+        if ($this->issuer !== null) {
+            return $this->issuer;
         }
 
-        if ($value instanceof ClaimInterface && $value instanceof AbstractClaim === false) {
-            // Exotic custom claim implementations: wrap into Custom.
-            return (new Custom($name, $value->getValue()))->withLeeway($this->leeway);
+        try {
+            $request = $this->container->get(RequestInterface::class);
+            if ($request instanceof RequestInterface) {
+                $uri = $request->getUri();
+                $scheme = $uri->getScheme();
+                $host = $uri->getHost();
+                $port = $uri->getPort();
+                $base = $scheme . '://' . $host;
+                if ($port && ! in_array($port, [80, 443])) {
+                    $base .= ':' . $port;
+                }
+                return $base;
+            }
+        } catch (\Throwable) {
+            // If we can't get the request (e.g. CLI context), return a default
         }
 
-        $class = $this->classMap[$name] ?? Custom::class;
-
-        if ($class === Custom::class) {
-            $claim = new Custom($name, $value);
-        } else {
-            $claim = new $class($value);
-        }
-
-        return $claim->withLeeway($this->leeway);
+        return 'hyperf-jwt';
     }
 
     /**
-     * Generate a cryptographically-unique token id.
+     * Get the Issued At (iat) claim.
      */
-    protected function generateJti(): string
+    public function iat(): int
     {
-        return bin2hex(random_bytes(16));
+        return Utils::now()->getTimestamp();
     }
 
     /**
-     * Update the leeway (used when scene config changes at runtime).
+     * Get the Expiration (exp) claim.
      */
+    public function exp(): int
+    {
+        return Utils::now()->addMinutes((int) $this->ttl)->getTimestamp();
+    }
+
+    /**
+     * Get the Not Before (nbf) claim.
+     */
+    public function nbf(): int
+    {
+        return Utils::now()->getTimestamp();
+    }
+
+    /**
+     * Get the JWT Id (jti) claim.
+     */
+    public function jti(): string
+    {
+        return bin2hex(random_bytes(8));
+    }
+
+    /**
+     * Add a new claim mapping.
+     */
+    public function extend(string $name, string $classPath): static
+    {
+        $this->classMap[$name] = $classPath;
+
+        return $this;
+    }
+
+    public function setIssuer(?string $issuer): static
+    {
+        $this->issuer = $issuer;
+
+        return $this;
+    }
+
+    public function getIssuer(): ?string
+    {
+        return $this->issuer;
+    }
+
+    public function setTTL(?int $ttl): static
+    {
+        $this->ttl = $ttl;
+
+        return $this;
+    }
+
+    public function getTTL(): ?int
+    {
+        return $this->ttl;
+    }
+
     public function setLeeway(int $leeway): static
     {
         $this->leeway = $leeway;
 
         return $this;
-    }
-
-    /**
-     * Update the claim configuration at runtime (used by PayloadFactory).
-     *
-     * @param array $claimsConfig
-     */
-    public function setClaimConfig(array $claimsConfig): static
-    {
-        $this->config = $claimsConfig;
-
-        return $this;
-    }
-
-    /**
-     * Get the current claim configuration.
-     */
-    public function getClaimConfig(): array
-    {
-        return $this->config;
     }
 
     public function getLeeway(): int

@@ -1,390 +1,259 @@
-# Kooditorm/hyperf-jwt
+# Kooditorm Hyperf JWT
 
-> 面向 Hyperf 3.1+ 的协程友好型 JWT 扩展包 —— 参考 tymon/jwt-auth 架构，支持多场景、黑名单吊销、刷新令牌与多种签名算法。
-
-[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.1-8892BF.svg)](https://www.php.net/)
-[![Hyperf](https://img.shields.io/badge/Hyperf-3.1+-5059d8.svg)](https://hyperf.io/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+基于 [tymon/jwt-auth](https://github.com/tymondesigns/jwt-auth) 适配 Hyperf 框架的 JSON Web Token 认证包。
 
 ## 特性
 
-- **tymon/jwt-auth 架构**：`Manager`（核心引擎）+ `JWTProvider`（编解码抽象）+ `PayloadFactory`（载荷工厂）+ `Token`（值对象）分层设计。
-- **协程友好**：基于 Hyperf 缓存驱动实现黑名单，天然适配 Swoole / Swow 协程运行时。
-- **多场景（Scene）**：一套配置管理多个独立的 JWT 上下文（如 `api`、`admin`、`app`），各自独立密钥 / 算法 / TTL。
-- **JWTSubject 契约**：实现 `getJWTIdentifier()` / `getJWTCustomClaims()` 即可将用户模型与 JWT 打通。
-- **完整算法支持**：HMAC（HS256/384/512）、RSA（RS256/384/512）、ECDSA（ES256/384），ECDSA 已处理 ASN.1 ↔ raw 签名格式转换。
-- **黑名单吊销**：基于 `jti` 的令牌撤销机制，支持宽限期（grace period）。
-- **刷新令牌**：在可配置的刷新窗口内用过期令牌换取新令牌，旧令牌自动入黑名单。
-- **零外部 JWT 依赖**：签名与编解码全部基于 PHP 原生 `openssl` / `hash` 扩展。
-- **开箱即用中间件**：`JwtAuthMiddleware`（认证）+ `RefreshMiddleware`（自动刷新）。
-
-## 架构
-
-```
-JWT (extends Manager)
-  ├── JWTProvider (NativeJwtProvider)    低层编解码 + 签名
-  ├── PayloadFactory                      载荷工厂（默认声明 + 自定义声明）
-  │     └── Claims\Factory               声明构造
-  ├── PayloadValidator                    声明校验（exp/nbf/iat/iss/aud）
-  └── Blacklist                           令牌吊销
-        └── BlacklistStorage → PSR-16    缓存抽象
-
-JwtManager                               多场景管理器
-  └── JwtFactory                          从配置构建 JWT 实例
-        └── JWT (per scene)
-```
+- 完整的 JWT 编码/解码/刷新/黑名单机制
+- 协程安全（使用 Hyperf Context 存储请求级状态）
+- PSR-15 中间件
+- 支持 HMAC / RSA / ECDSA 算法
+- 基于 Lcobucci JWT 库
+- 可插拔的 Provider 架构（JWT / Auth / Storage）
+- Hyperf ConfigProvider 自动注册
+- 命令行生成密钥
 
 ## 安装
 
 ```bash
-composer require hyperf-ext/jwt
+composer require kooditorm/hyperf-jwt
 ```
 
 发布配置文件：
 
 ```bash
-php bin/hyperf.php vendor:publish hyperf-ext/jwt
+php bin/hyperf.php vendor:publish kooditorm/hyperf-jwt
 ```
 
-## 生成密钥
-
-### HMAC 密钥（HS256/384/512）
+生成密钥：
 
 ```bash
-# 生成随机密钥并写入 .env 的 JWT_SECRET=
 php bin/hyperf.php jwt:secret
-
-# 仅显示密钥不写入文件
-php bin/hyperf.php jwt:secret --show
-
-# 强制覆盖已有的 JWT_SECRET
-php bin/hyperf.php jwt:secret --force
 ```
-
-### RSA / ECDSA 密钥对（RS*/ES*）
-
-```bash
-# 生成 RSA 2048 密钥对（默认）
-php bin/hyperf.php jwt:keys
-
-# 生成 RSA 4096
-php bin/hyperf.php jwt:keys --algo=rsa --bits=4096
-
-# 生成 ECDSA P-256（对应 ES256）
-php bin/hyperf.php jwt:keys --algo=ecdsa --bits=256
-
-# 指定输出目录
-php bin/hyperf.php jwt:keys --path=/data/jwt-keys
-
-# 强制覆盖已有文件
-php bin/hyperf.php jwt:keys --force
-```
-
-生成后命令会提示需要设置的 `.env` 变量：
-
-```
-JWT_ALGO=RS256
-JWT_PUBLIC_KEY=/path/to/jwt-keys/jwt-rsa-public.pem
-JWT_PRIVATE_KEY=/path/to/jwt-keys/jwt-rsa-private.pem
-```
-
-<details>
-<summary>或使用 openssl 命令行手动生成</summary>
-
-```bash
-# RSA
-openssl genrsa -out private.pem 2048
-openssl rsa -in private.pem -pubout -out public.pem
-
-# ECDSA (P-256)
-openssl ecparam -genkey -name prime256v1 -noout -out private.pem
-openssl ec -in private.pem -pubout -out public.pem
-```
-
-</details>
 
 ## 配置
 
+配置文件位于 `config/autoload/jwt.php`：
+
 ```php
-// config/autoload/jwt.php
 return [
-    'default' => env('JWT_DEFAULT_SCENE', 'default'),
-
-    'scenes' => [
-        'default' => [
-            'secret' => env('JWT_SECRET', ''),
-            'keys' => [
-                'public'    => env('JWT_PUBLIC_KEY', ''),
-                'private'   => env('JWT_PRIVATE_KEY', ''),
-                'passphrase'=> env('JWT_PASSPHRASE', ''),
-            ],
-            'algo'        => env('JWT_ALGO', 'HS256'),
-            'ttl'         => env('JWT_TTL', 60),        // 分钟
-            'refresh_ttl' => env('JWT_REFRESH_TTL', 20160), // 分钟
-            'leeway'      => env('JWT_LEEWAY', 0),       // 秒
-            'claims' => [
-                'iss' => env('JWT_ISS', null),
-                'aud' => env('JWT_AUD', null),
-                'nbf' => env('JWT_NBF', 0),
-                'jti' => env('JWT_JTI', true),
-            ],
-            'blacklist_enabled'        => env('JWT_BLACKLIST_ENABLED', true),
-            'blacklist_grace_period'   => env('JWT_BLACKLIST_GRACE', 0),
-            'blacklist_storage_ttl'    => env('JWT_BLACKLIST_TTL', 20160),
-        ],
-    ],
-
-    'blacklist_storage' => [
-        'driver' => env('JWT_BLACKLIST_DRIVER', 'default'),
-        'prefix' => env('JWT_BLACKLIST_PREFIX', 'jwt:blacklist:'),
-    ],
-
-    'providers' => [
-        'jwt' => \HyperfExt\Jwt\Providers\NativeJwtProvider::class,
-    ],
+    'secret' => env('JWT_SECRET'),
+    'ttl' => 60,                    // token 有效期（分钟）
+    'refresh_ttl' => 20160,         // 刷新窗口（分钟）
+    'algo' => 'HS256',              // 签名算法
+    'blacklist_enabled' => true,    // 启用黑名单
+    'user_model' => 'App\Model\User',
+    // ...
 ];
 ```
 
-## 快速开始
+## 使用
 
-### 基本用法
-
-```php
-use HyperfExt\Jwt\Contracts\JWTInterface;
-use HyperfExt\Jwt\JwtManager;
-
-// 通过 DI 注入 JwtManager 或 JWTInterface
-public function __construct(
-    protected JwtManager $manager
-) {}
-
-// 编码（返回 Token 值对象）
-$token = $this->manager->encodeFromClaims(['user_id' => 123, 'role' => 'admin']);
-$tokenString = $token->get();  // "xxx.yyy.zzz"
-
-// 解码（返回 Payload）
-$payload = $this->manager->decode($token);
-$claims = $payload->toArray();  // ['user_id' => 123, 'role' => 'admin', 'iat' => ..., ...]
-```
-
-### 基于 JWTSubject 创建令牌（tymon 风格）
+### 1. User 模型实现 JWTSubject 接口
 
 ```php
-use HyperfExt\Jwt\Contracts\JWTSubject;
-use HyperfExt\Jwt\Support\CustomClaims;
+namespace App\Model;
 
-class User implements JWTSubject
+use Kooditorm\Hyperf\Jwt\Contracts\JWTSubject;
+use Hyperf\Database\Model\Model;
+
+class User extends Model implements JWTSubject
 {
-    use CustomClaims;
-
     public function getJWTIdentifier(): mixed
     {
-        return $this->id;
+        return $this->getKey();
     }
 
-    // getJWTCustomClaims() 由 trait 提供空数组默认实现
-    // 也可覆盖：
     public function getJWTCustomClaims(): array
     {
-        return ['role' => $this->role];
+        return [
+            // 'role' => 'admin',
+        ];
+    }
+
+    public function getAuthPassword(): string
+    {
+        return $this->password;
     }
 }
-
-// 从用户模型创建令牌
-$token = $this->manager->fromSubject($user);
 ```
 
-### 解析请求令牌 + 认证（tymon 风格链式 API）
+### 2. 生成 Token
 
 ```php
-$jwt = $this->manager->scene('api');
+use Kooditorm\Hyperf\Jwt\JWTAuth;
 
-// 从 Authorization 头解析
-if ($jwt->parseToken($request->getHeaderLine('Authorization'))) {
-    $payload = $jwt->getPayload();      // 获取当前令牌的 Payload
-    $user = $jwt->subject();            // 通过 resolver 解析用户
+class AuthController
+{
+    public function __construct(private JWTAuth $jwt) {}
+
+    public function login()
+    {
+        $credentials = [
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+        ];
+
+        if (! $token = $this->jwt->attempt($credentials)) {
+            return ['error' => 'Unauthorized'];
+        }
+
+        return [
+            'token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => $this->jwt->factory()->getTTL() * 60,
+        ];
+    }
+
+    // 从指定用户生成 token
+    public function tokenForUser(User $user): string
+    {
+        return $this->jwt->fromUser($user);
+    }
 }
-
-// 设置 subject resolver
-$jwt->setSubjectResolver(function ($id) {
-    return User::find($id);
-});
-
-// 刷新 / 吊销当前令牌
-$newToken = $jwt->refresh();
-$jwt->invalidate();
 ```
 
-### PayloadFactory 链式 API
+### 3. 中间件鉴权
 
-```php
-$factory = $this->manager->default()->getPayloadFactory();
-
-$payload = $factory
-    ->sub(123)
-    ->customClaims(['role' => 'admin'])
-    ->setTTL(7200)    // 秒
-    ->make();
-
-$token = $this->manager->encode($payload);
-```
-
-### 多场景
-
-```php
-$jwt = $this->manager->scene('admin');
-// 每个场景独立的密钥/算法/TTL/黑名单
-```
-
-### 黑名单
-
-```php
-// 吊销令牌（加入黑名单）
-$this->manager->invalidate($token);
-
-// 检查令牌是否有效
-$isValid = $this->manager->validate($token);  // bool
-
-// 刷新令牌（旧令牌自动入黑名单）
-$newToken = $this->manager->refresh($token);
-```
-
-## 中间件
-
-### JwtAuthMiddleware — 认证
-
-```php
-// config/autoload/middlewares.php
-return [
-    'http' => [
-        \HyperfExt\Jwt\Middleware\JwtAuthMiddleware::class,
-    ],
-];
-```
-
-从 `Authorization: Bearer <token>` 头或 `?token=` 查询参数提取令牌，解码后将声明存入请求属性 `jwt_claims`。失败返回 401。
-
-### RefreshMiddleware — 自动刷新
+在 `config/autoload/middlewares.php` 中注册：
 
 ```php
 return [
     'http' => [
-        \HyperfExt\Jwt\Middleware\RefreshMiddleware::class,
+        // 路由级中间件
     ],
 ];
 ```
 
-每次请求自动刷新令牌并在响应头 `Authorization: Bearer <new-token>` 返回新令牌。过期令牌在刷新窗口内自动续期。
+或直接在控制器注解中使用：
 
-## 算法支持
+```php
+use Kooditorm\Hyperf\Jwt\Http\Middleware\JWTAuthMiddleware;
 
-| 算法 | 类型 | 场景配置 `algo` |
-|------|------|----------------|
-| HS256 | HMAC-SHA256 | `HS256` |
-| HS384 | HMAC-SHA384 | `HS384` |
-| HS512 | HMAC-SHA512 | `HS512` |
-| RS256 | RSA-SHA256 | `RS256` |
-| RS384 | RSA-SHA384 | `RS384` |
-| RS512 | RSA-SHA512 | `RS512` |
-| ES256 | ECDSA-P256 | `ES256` |
-| ES384 | ECDSA-P384 | `ES384` |
-
-### 密钥生成
-
-使用上方 [生成密钥](#生成密钥) 部分的命令即可，也可手动运行 openssl（见折叠部分）。
-
-## API 参考
-
-### Token（值对象）
-
-| 方法 | 返回 | 说明 |
-|------|------|------|
-| `__construct(string)` | - | 从字符串创建 |
-| `Token::from(Token\|string)` | `self` | 工厂方法 |
-| `get()` | `string` | 获取原始字符串 |
-| `segments()` | `array` | 拆分为三段 |
-
-### Manager（核心引擎）
-
-| 方法 | 返回 | 说明 |
-|------|------|------|
-| `encode(Payload)` | `Token` | 编码载荷 |
-| `encodeFromClaims(array)` | `Token` | 从自定义声明编码 |
-| `decode(Token\|string)` | `Payload` | 解码并校验 |
-| `refresh(Token\|string\|null)` | `Token` | 刷新令牌 |
-| `invalidate(Token\|string\|null)` | `bool` | 吊销令牌 |
-| `validate(Token\|string)` | `bool` | 验证令牌 |
-| `payload(Token\|string)` | `Payload` | 获取载荷（不校验声明） |
-
-### JWT（extends Manager）
-
-| 方法 | 返回 | 说明 |
-|------|------|------|
-| `fromSubject(JWTSubject)` | `Token` | 从用户模型创建令牌 |
-| `parseToken(?string)` | `self\|false` | 从 Authorization 头解析 |
-| `setToken(Token\|string)` | `self` | 设置当前令牌 |
-| `getToken()` | `?Token` | 获取当前令牌 |
-| `getPayload()` | `Payload` | 获取当前令牌载荷 |
-| `subject()` | `?JWTSubject` | 通过 resolver 解析用户 |
-| `setSubjectResolver(callable)` | `self` | 设置用户解析器 |
-| `reset()` | `self` | 重置令牌状态 |
-
-### PayloadFactory
-
-| 方法 | 返回 | 说明 |
-|------|------|------|
-| `customClaims(array)` | `self` | 添加自定义声明 |
-| `sub(mixed)` | `self` | 设置 sub |
-| `aud(mixed)` | `self` | 设置 aud |
-| `iss(string)` | `self` | 设置 iss |
-| `setTTL(int)` | `self` | 覆盖 TTL（秒） |
-| `make(array)` | `Payload` | 构建 Payload |
-| `clearClaims()` | `self` | 清空声明 |
-
-## 异常
-
-| 异常 | 说明 |
-|------|------|
-| `JWTException` | 基类 |
-| `TokenInvalidException` | 令牌格式错误 / 签名不匹配 |
-| `TokenExpiredException` | 令牌已过期 |
-| `TokenNotYetValidException` | 令牌尚未生效 |
-| `SignatureInvalidException` | 签名验证失败 |
-| `TokenBlacklistedException` | 令牌已被吊销 |
-
-## 目录结构
-
+class UserController
+{
+    #[Middleware(JWTAuthMiddleware::class)]
+    public function profile()
+    {
+        $user = $this->jwt->user();
+        return $user;
+    }
+}
 ```
-src/
-├── Manager.php                    核心引擎
-├── JWT.php                        JWT（extends Manager，auth 层）
-├── JwtFactory.php                 从配置构建实例
-├── JwtManager.php                 多场景管理器
-├── PayloadFactory.php             载荷工厂（链式 API）
-├── Token.php                      Token 值对象
-├── ConfigProvider.php             Hyperf 配置提供者
-├── Contracts/
-│   ├── JWTInterface.php           JWT 服务契约
-│   ├── JWTProvider.php            编解码引擎契约
-│   ├── JWTSubject.php             用户模型契约
-│   ├── ClaimInterface.php
-│   ├── SignerInterface.php
-│   └── StorageInterface.php
-├── Providers/
-│   └── NativeJwtProvider.php      原生 PHP 编解码实现
-├── Claims/                        声明系统（11 文件）
-├── Signers/                       签名器（13 文件）
-├── Payload/                       Payload + Validator
-├── Blacklist/                     黑名单 + 存储
-├── Validators/
-│   └── TokenValidator.php         令牌格式校验
-├── Support/                       Base64Url / Json / CustomClaims
-├── Command/
-│   ├── JwtSecretCommand.php       jwt:secret — 生成 HMAC 密钥
-│   └── JwtKeysCommand.php         jwt:keys — 生成 RSA/ECDSA 密钥对
-├── Middleware/                    JwtAuthMiddleware + RefreshMiddleware
-└── Exceptions/                    6 个异常类
+
+### 4. 刷新 Token
+
+```php
+// 刷新当前 token
+$newToken = $this->jwt->parseToken()->refresh();
+
+// 或使用中间件自动刷新
+use Kooditorm\Hyperf\Jwt\Http\Middleware\JWTRefreshMiddleware;
+
+#[Middleware(JWTRefreshMiddleware::class)]
+public function refresh()
+{
+    // 新 token 已在 Authorization 响应头中
+}
 ```
+
+### 5. 注销/拉黑 Token
+
+```php
+$this->jwt->parseToken()->invalidate();      // 拉黑当前 token
+$this->jwt->parseToken()->invalidate(true);  // 永久拉黑
+```
+
+### 6. 使用 Facade
+
+```php
+use Kooditorm\Hyperf\Jwt\Facades\JWTAuth;
+
+$token = JWTAuth::attempt($credentials);
+$user = JWTAuth::user();
+$payload = JWTAuth::payload();
+```
+
+## 中间件列表
+
+| 中间件 | 说明 |
+|--------|------|
+| `JWTAuthMiddleware` | 验证 token 并认证用户，失败返回 401 |
+| `JWTCheckMiddleware` | 检查 token 有效性，不强制要求 |
+| `JWTRefreshMiddleware` | 刷新 token，新 token 放入响应头 |
+| `JWTAuthAndRenewMiddleware` | 认证 + 刷新 token |
+
+## 自定义 Provider
+
+### 自定义 Auth Provider
+
+```php
+use Kooditorm\Hyperf\Jwt\Contracts\Providers\Auth;
+
+class MyAuthProvider implements Auth
+{
+    public function byCredentials(array $credentials): bool { ... }
+    public function byId(mixed $id): bool { ... }
+    public function user(): mixed { ... }
+}
+```
+
+在 ConfigProvider 中绑定：
+
+```php
+// config/autoload/dependencies.php
+return [
+    \Kooditorm\Hyperf\Jwt\Contracts\Providers\Auth::class => \App\Provider\MyAuthProvider::class,
+];
+```
+
+### 自定义 Storage Provider（如 Redis）
+
+```php
+use Kooditorm\Hyperf\Jwt\Contracts\Providers\Storage;
+use Hyperf\Redis\Redis;
+
+class RedisStorage implements Storage
+{
+    public function __construct(private Redis $redis) {}
+
+    public function add(string $key, mixed $value, int $minutes): void
+    {
+        $this->redis->setex($key, $minutes * 60, serialize($value));
+    }
+
+    public function forever(string $key, mixed $value): void
+    {
+        $this->redis->set($key, serialize($value));
+    }
+
+    public function get(string $key): mixed
+    {
+        $val = $this->redis->get($key);
+        return $val !== false ? unserialize($val) : null;
+    }
+
+    public function destroy(string $key): bool
+    {
+        return (bool) $this->redis->del($key);
+    }
+
+    public function flush(): void
+    {
+        $this->redis->flushDB();
+    }
+}
+```
+
+## 协程安全
+
+本包使用 `Hyperf\Context\Context` 存储当前请求的 token 和认证用户，确保在 Swoole 协程环境下安全使用。每个协程拥有独立的 token 上下文，互不干扰。
+
+## 致谢
+
+- [tymon/jwt-auth](https://github.com/tymondesigns/jwt-auth) - 原始 JWT 包
+- [lcobucci/jwt](https://github.com/lcobucci/jwt) - JWT 编解码库
+- [Hyperf](https://hyperf.io/) - 高性能协程框架
 
 ## License
 

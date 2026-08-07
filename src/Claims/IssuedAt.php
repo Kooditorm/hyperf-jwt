@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Claims;
 
-/**
- * `iat` - Issued At: the time at which the JWT was issued.
- *
- * A token may not claim to have been issued in the future.
- */
-class IssuedAt extends AbstractClaim
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenExpiredException;
+use Kooditorm\Hyperf\Jwt\Support\Utils;
+
+class IssuedAt extends Claim
 {
+    use DatetimeTrait;
+
     protected string $name = 'iat';
 
-    public function validate(mixed $value): bool
+    public function validateRefresh(int $refreshTTL): mixed
     {
-        if (! is_numeric($value)) {
-            return false;
+        if ($refreshTTL !== 0 && Utils::timestamp((int) $this->getValue())->addMinutes($refreshTTL)->isPast()) {
+            throw new TokenExpiredException('Token has expired and can no longer be refreshed');
         }
 
-        return (int) $value <= (time() + $this->leeway);
+        return $this->getValue();
     }
 }
