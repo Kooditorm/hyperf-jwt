@@ -6,13 +6,8 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Sean Tymon",
-            "email": "tymon148@gmail.com",
-            "role": "Original Developer"
-        },
-        {
-            "name": "kooditorm",
-            "role": "Hyperf Adapter"
+            "name": "oswin.hu",
+            "email": "oswin.hu@gmail.com"
         }
     ],
     "require": {
@@ -54,15 +49,5 @@
         "hyperf": {
             "config": "Kooditorm\\Hyperf\\Jwt\\ConfigProvider"
         }
-    },
-    "config": {
-        "sort-packages": true
-    },
-    "prefer-stable": true,
-    "minimum-stability": "dev",
-    "scripts": {
-        "test": "phpunit --colors=always",
-        "analyse": "phpstan analyse --memory-limit 1024M",
-        "cs-fix": "php-cs-fixer fix $1"
     }
 }
