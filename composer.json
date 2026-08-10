@@ -24,9 +24,6 @@
         "lcobucci/jwt": "^4.0 || ^5.0",
         "nesbot/carbon": "^2.0 || ^3.0",
         "psr/container": "^1.0 || ^2.0",
-        "psr/http-message": "^1.0 || ^2.0",
-        "psr/http-server": "^1.0",
-        "psr/simple-cache": "^1.0 || ^3.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
