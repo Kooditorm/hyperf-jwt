@@ -9,6 +9,7 @@ declare(strict_types=1);
  */
 
 use Kooditorm\Hyperf\Jwt\Providers\JWT\Lcobucci;
+use function Hyperf\Support\env;
 
 return [
 
