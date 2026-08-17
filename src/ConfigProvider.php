@@ -63,7 +63,7 @@ class ConfigProvider
                 $config = $container->get(ConfigInterface::class);
                 return new HyperfAuth(
                     $container,
-                    $config->get('jwt.user_model', '')
+                    $config
                 );
             },
 

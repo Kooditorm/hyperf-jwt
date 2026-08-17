@@ -181,6 +181,52 @@ return [
     'user_model' => env('JWT_USER_MODEL', 'App\Model\User'),
 
     /*
+   |--------------------------------------------------------------------------
+   | Authentication Guards & Providers
+   |--------------------------------------------------------------------------
+   |
+   | Modeled after Laravel's auth config. Define multiple guards
+   | (scenarios) each backed by a user provider (model).
+   |
+   | Example scenarios: api (App users), admin (backend admins).
+   |
+   | Each guard maps to one provider. Each provider maps to one model class.
+   | The default guard is used when none is explicitly specified.
+   |
+   */
+    'auth' => [
+        /*
+        | Default guard to use.
+        */
+        'defaults' => env('JWT_GUARD_DEFAULT', 'api'),
+
+        /*
+        | Guard configurations.
+        | Each guard specifies its driver ('jwt') and the user provider.
+        */
+        'guards' => [
+            'api' => [
+                'provider' => 'users',
+            ],
+
+            'admin' => [
+                'provider' => 'admins',
+            ],
+        ],
+
+        /*
+        | User Provider configurations.
+        | Each provider maps a guard to a specific user model.
+        */
+        'providers' => [
+            'users' => [
+                'model' => App\Model\Admin,
+            ]
+        ],
+    ],
+
+
+    /*
     |--------------------------------------------------------------------------
     | Providers
     |--------------------------------------------------------------------------
