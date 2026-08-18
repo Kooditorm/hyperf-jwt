@@ -20,6 +20,7 @@ use Kooditorm\Hyperf\Jwt\Providers\Auth\HyperfAuth;
 use Kooditorm\Hyperf\Jwt\Providers\JWT\Lcobucci;
 use Kooditorm\Hyperf\Jwt\Providers\Storage\HyperfCache;
 use Kooditorm\Hyperf\Jwt\Validators\PayloadValidator;
+use Kooditorm\Hyperf\Jwt\JWTGuard;
 
 class ConfigProvider
 {
@@ -143,6 +144,10 @@ class ConfigProvider
                     $container->get(Parser::class)
                 ))->lockSubject((bool) $config->get('jwt.lock_subject', true));
             },
+
+            'jwt.grard' => function () {
+                return new JWTGuard();
+            }
         ];
     }
 }
