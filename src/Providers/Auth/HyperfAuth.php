@@ -45,7 +45,7 @@ class HyperfAuth implements AuthContract, FactoryContract
     protected ?string $userContextKey = 'kooditorm.jwt.user';
 
 
-    public function __construct(ContainerInterface $container, ConfigInterface $config = [])
+    public function __construct(ContainerInterface $container, ConfigInterface $config)
     {
         $this->container = $container;
         $this->config = $config;
