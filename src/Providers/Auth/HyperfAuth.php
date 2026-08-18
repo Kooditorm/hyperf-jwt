@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Jwt\Providers\Auth;
 
 use Hyperf\Context\Context;
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Database\Model\Model;
 use Psr\Container\ContainerInterface;
 use Kooditorm\Hyperf\Jwt\Contracts\Providers\Auth as AuthContract;
@@ -39,12 +40,12 @@ class HyperfAuth implements AuthContract, FactoryContract
      */
     protected $userResolver;
 
-    protected array $config;
+    protected ConfigInterface $config;
 
     protected ?string $userContextKey = 'kooditorm.jwt.user';
 
 
-    public function __construct(ContainerInterface $container, array $config = [])
+    public function __construct(ContainerInterface $container, ConfigInterface $config = [])
     {
         $this->container = $container;
         $this->config = $config;
