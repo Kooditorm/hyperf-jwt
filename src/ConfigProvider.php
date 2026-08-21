@@ -11,6 +11,11 @@ declare(strict_types=1);
  */
 
 namespace Kooditorm\Hyperf;
+
+use Kooditorm\Hyperf\Hash\Contracts\HashInterface;
+use Kooditorm\Hyperf\Hash\HashManager;
+
+
 class ConfigProvider
 {
 
@@ -18,6 +23,7 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
+                HashInterface::class => HashManager::class,
             ],
             'commands' => [
             ],
