@@ -14,6 +14,7 @@ namespace Kooditorm\Hyperf\Hash\Driver;
 
 use Kooditorm\Hyperf\Hash\DriverInterface;
 use RuntimeException;
+
 class Argon2IDriver extends AbstractDriver implements DriverInterface
 {
     /**
