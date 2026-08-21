@@ -12,11 +12,8 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf;
 
-//use Kooditorm\Hyperf\Hash\Contracts\HashInterface;
-//use Kooditorm\Hyperf\Hash\HashManager;
-
-use Kooditorm\Hyperf\Hash\Contract\TestInterface;
-use Kooditorm\Hyperf\Hash\TestManager;
+use Kooditorm\Hyperf\Hash\Contracts\HashInterface;
+use Kooditorm\Hyperf\Hash\HashManager;
 
 
 class ConfigProvider
@@ -26,20 +23,19 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
-//                HashInterface::class => HashManager::class,
-                TestInterface::class => TestManager::class,
+                HashInterface::class => HashManager::class,
             ],
             'commands' => [
             ],
             'annotations' => [],
-//            'publish' => [
-//                [
-//                    'id' => 'config',
-//                    'description' => 'The config for Kooditorm/Hyperf-jwt package.',
-//                    'source' => __DIR__ . '/../publish/auth.php',
-//                    'destination' => BASE_PATH . '/config/autoload/auth.php',
-//                ]
-//            ]
+            'publish' => [
+                [
+                    'id' => 'config',
+                    'description' => 'The config for Kooditorm/Hyperf-jwt package.',
+                    'source' => __DIR__ . '/../publish/auth.php',
+                    'destination' => BASE_PATH . '/config/autoload/auth.php',
+                ]
+            ]
         ];
     }
 }
