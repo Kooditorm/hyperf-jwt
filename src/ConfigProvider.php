@@ -27,13 +27,15 @@ class ConfigProvider
             ],
             'commands' => [
             ],
-            'annotations' => [
-                'scan' => [
-                    'paths' => [
-                        __DIR__,
-                    ],
-                ],
-            ],
+            'annotations' => [],
+            'publish' => [
+                [
+                    'id' => 'config',
+                    'description' => 'The config for Kooditorm/Hyperf-jwt package.',
+                    'source' => __DIR__ . '/../publish/auth.php',
+                    'destination' => BASE_PATH . '/config/autoload/auth.php',
+                ]
+            ]
         ];
     }
 }
