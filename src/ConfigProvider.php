@@ -15,7 +15,7 @@ namespace Kooditorm\Hyperf;
 //use Kooditorm\Hyperf\Hash\Contracts\HashInterface;
 //use Kooditorm\Hyperf\Hash\HashManager;
 
-use Kooditorm\Hyperf\Hash\Contracts\TestInterface;
+use Kooditorm\Hyperf\Hash\Contract\TestInterface;
 use Kooditorm\Hyperf\Hash\TestManager;
 
 
