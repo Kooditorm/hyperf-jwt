@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf;
 
+use Kooditorm\Hyperf\Auth\Access\GateManager;
+use Kooditorm\Hyperf\Auth\Contracts\Access\GateManagerInterface;
 use Kooditorm\Hyperf\Hash\Contracts\HashInterface;
 use Kooditorm\Hyperf\Hash\HashManager;
 
@@ -24,14 +26,30 @@ class ConfigProvider
         return [
             'dependencies' => [
                 HashInterface::class => HashManager::class,
+                GateManagerInterface::class => GateManager::class,
             ],
             'commands' => [
             ],
-            'annotations' => [],
+            'annotations' => [
+                'scan' => [
+                    'paths' => [
+                        __DIR__,
+                    ],
+                    'ignore_annotations' => [
+                        'mixin'
+                    ]
+                ]
+            ],
             'publish' => [
                 [
                     'id' => 'config',
-                    'description' => 'The config for Kooditorm/Hyperf-jwt package.',
+                    'description' => 'The config for Kooditorm/Hyperf-jwt/hash package.',
+                    'source' => __DIR__ . '/../publish/hash.php',
+                    'destination' => BASE_PATH . '/config/autoload/hash.php',
+                ],
+                [
+                    'id' => 'config',
+                    'description' => 'The config for Kooditorm/Hyperf-jwt/auth package.',
                     'source' => __DIR__ . '/../publish/auth.php',
                     'destination' => BASE_PATH . '/config/autoload/auth.php',
                 ]
