@@ -3,26 +3,29 @@
 declare(strict_types=1);
 
 /**
- * JWT Authentication Configuration for Hyperf
+ * This file is part of Kooditorm/hyperf-jwt.
  *
- * Adapted from tymon/jwt-auth for the Hyperf framework.
+ * @link     https://github.com/Kooditorm/hyperf-jwt
+ * @contact  oswin.hu@gmail.com
+ * @license  https://github.com/Kooditorm/hyperf-jwt/blob/master/LICENSE
  */
 
-use Kooditorm\Hyperf\Jwt\Providers\JWT\Lcobucci;
 use function Hyperf\Support\env;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | JWT Authentication Secret
     |--------------------------------------------------------------------------
     |
-    | Set this in your .env file. Use `php bin/hyperf.php jwt:secret`
-    | to generate a random secret.
+    | Don't forget to set this in your .env file, as it will be used to sign
+    | your tokens. A helper command is provided for this:
+    | `php bin/hyperf.php gen:jwt-secret`
     |
-    | Used for Symmetric algorithms only (HMAC).
-    | RSA and ECDSA use a private/public key combo (see below).
+    | Note: This will be used for Symmetric algorithms only (HMAC),
+    | since RSA and ECDSA use a private/public key pair (See below).
+    |
+    | Note: This value must be encoded by base64.
     |
     */
 
@@ -33,71 +36,114 @@ return [
     | JWT Authentication Keys
     |--------------------------------------------------------------------------
     |
-    | Symmetric Algorithms (HS256, HS384, HS512) use `secret`.
-    | Asymmetric Algorithms (RS256, ES256, etc.) use the keys below.
+    | The algorithm you are using, will determine whether your tokens are
+    | signed with a random string (defined in `JWT_SECRET`) or using the
+    | following public and private keys. A helper command is provided for this:
+    | `php bin/hyperf.php gen:jwt-keypair`
+    |
+    | Symmetric Algorithms:
+    | HS256, HS384 & HS512 will use `JWT_SECRET`.
+    |
+    | Asymmetric Algorithms:
+    | RS256, RS384 & RS512 / ES256, ES384 & ES512 will use the keys below.
     |
     */
 
     'keys' => [
+        /*
+        |--------------------------------------------------------------------------
+        | Public Key
+        |--------------------------------------------------------------------------
+        |
+        | Your public key content.
+        |
+        */
+
         'public' => env('JWT_PUBLIC_KEY'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Private Key
+        |--------------------------------------------------------------------------
+        |
+        | Your private key content.
+        |
+        */
+
         'private' => env('JWT_PRIVATE_KEY'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Passphrase
+        |--------------------------------------------------------------------------
+        |
+        | The passphrase for your private key. Can be null if none set.
+        |
+        | Note: This value must be encoded by base64.
+        |
+        */
+
         'passphrase' => env('JWT_PASSPHRASE'),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | JWT time to live (in minutes)
+    | JWT time to live
     |--------------------------------------------------------------------------
     |
-    | The token validity duration. Default: 60 minutes (1 hour).
-    | Set to null for a never-expiring token (not recommended).
-    | If null, remove 'exp' from 'required_claims'.
+    | Specify the length of time (in seconds) that the token will be valid for.
+    | Defaults to 1 hour.
+    |
+    | You can also set this to null, to yield a never expiring token.
+    | Some people may want this behaviour for e.g. a mobile app.
+    | This is not particularly recommended, so make sure you have appropriate
+    | systems in place to revoke the token if necessary.
+    | Notice: If you set this to null you should remove 'exp' element from 'required_claims' list.
     |
     */
 
-    'ttl' => env('JWT_TTL', 60),
+    'ttl' => (int) env('JWT_TTL', 3600),
 
     /*
     |--------------------------------------------------------------------------
-    | Refresh time to live (in minutes)
+    | Refresh time to live
     |--------------------------------------------------------------------------
     |
-    | The window within which a token can be refreshed.
-    | Default: 20160 minutes (2 weeks).
+    | Specify the length of time (in seconds) that the token can be refreshed
+    | within. I.E. The user can refresh their token within a 2 week window of
+    | the original token being created until they must re-authenticate.
+    | Defaults to 2 weeks.
+    |
+    | You can also set this to null, to yield an infinite refresh time.
+    | Some may want this instead of never expiring tokens for e.g. a mobile app.
+    | This is not particularly recommended, so make sure you have appropriate
+    | systems in place to revoke the token if necessary.
     |
     */
 
-    'refresh_ttl' => env('JWT_REFRESH_TTL', 20160),
+    'refresh_ttl' => (int) env('JWT_REFRESH_TTL', 3600 * 24 * 14),
 
     /*
     |--------------------------------------------------------------------------
     | JWT hashing algorithm
     |--------------------------------------------------------------------------
     |
-    | Default: HS256
+    | Specify the hashing algorithm that will be used to sign the token.
+    |
+    | possible values: HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512
     |
     */
 
-    'algo' => env('JWT_ALGO', Lcobucci::ALGO_HS256),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Issuer claim
-    |--------------------------------------------------------------------------
-    |
-    | The issuer (iss) claim. If null, the issuer is auto-detected
-    | from the request URL.
-    |
-    */
-
-    'iss' => env('JWT_ISSUER'),
+    'algo' => env('JWT_ALGO', 'HS512'),
 
     /*
     |--------------------------------------------------------------------------
     | Required Claims
     |--------------------------------------------------------------------------
     |
-    | Claims that must exist in any token.
+    | Specify the required claims that must exist in any token.
+    | A TokenInvalidException will be thrown if any of these claims are not
+    | present in the payload.
     |
     */
 
@@ -115,8 +161,11 @@ return [
     | Persistent Claims
     |--------------------------------------------------------------------------
     |
-    | Claims to persist when refreshing a token.
-    | 'sub' and 'iat' are always persisted.
+    | Specify the claim keys to be persisted when refreshing a token.
+    | `sub` and `iat` will automatically be persisted, in
+    | addition to the these claims.
+    |
+    | Note: If a claim does not exist then it will be ignored.
     |
     */
 
@@ -130,7 +179,15 @@ return [
     | Lock Subject
     |--------------------------------------------------------------------------
     |
-    | Adds a 'prv' claim to prevent cross-model token impersonation.
+    | This will determine whether a `prv` claim is automatically added to
+    | the token. The purpose of this is to ensure that if you have multiple
+    | authentication models e.g. `App\User` & `App\OtherPerson`, then we
+    | should prevent one authentication request from impersonating another,
+    | if 2 tokens happen to have the same id across the 2 different models.
+    |
+    | Under specific circumstances, you may want to disable this behaviour
+    | e.g. if you only have one authentication model, then you would save
+    | a little on token size.
     |
     */
 
@@ -138,107 +195,58 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Leeway (seconds)
+    | Leeway
     |--------------------------------------------------------------------------
     |
-    | Time cushion for clock skew. Applies to iat, nbf, and exp claims.
+    | This property gives the jwt timestamp claims some "leeway".
+    | Meaning that if you have any unavoidable slight clock skew on
+    | any of your servers then this will afford you some level of cushioning.
+    |
+    | This applies to the claims `iat`, `nbf` and `exp`.
+    |
+    | Specify in seconds - only if you know you need it.
     |
     */
 
-    'leeway' => env('JWT_LEEWAY', 0),
+    'leeway' => (int) env('JWT_LEEWAY', 0),
 
     /*
     |--------------------------------------------------------------------------
     | Blacklist Enabled
     |--------------------------------------------------------------------------
     |
-    | Required for token invalidation.
+    | In order to invalidate tokens, you must have the blacklist enabled.
+    | If you do not want or need this functionality, then set this to false.
     |
     */
 
     'blacklist_enabled' => env('JWT_BLACKLIST_ENABLED', true),
 
     /*
-    |--------------------------------------------------------------------------
-    | Blacklist Grace Period (seconds)
-    |--------------------------------------------------------------------------
+    | -------------------------------------------------------------------------
+    | Blacklist Grace Period
+    | -------------------------------------------------------------------------
     |
-    | Prevents parallel request failures during token regeneration.
+    | When multiple concurrent requests are made with the same JWT,
+    | it is possible that some of them fail, due to token regeneration
+    | on every request.
     |
-    */
-
-    'blacklist_grace_period' => env('JWT_BLACKLIST_GRACE_PERIOD', 0),
-
-    /*
-    |--------------------------------------------------------------------------
-    | User Model
-    |--------------------------------------------------------------------------
-    |
-    | The model used for authentication.
+    | Set grace period in seconds to prevent parallel request failure.
     |
     */
 
-    'user_model' => env('JWT_USER_MODEL', 'App\Model\User'),
-
-    /*
-   |--------------------------------------------------------------------------
-   | Authentication Guards & Providers
-   |--------------------------------------------------------------------------
-   |
-   | Modeled after Laravel's auth config. Define multiple guards
-   | (scenarios) each backed by a user provider (model).
-   |
-   | Example scenarios: api (App users), admin (backend admins).
-   |
-   | Each guard maps to one provider. Each provider maps to one model class.
-   | The default guard is used when none is explicitly specified.
-   |
-   */
-    'auth' => [
-        /*
-        | Default guard to use.
-        */
-        'defaults' => env('JWT_GUARD_DEFAULT', 'api'),
-
-        /*
-        | Guard configurations.
-        | Each guard specifies its driver ('jwt') and the user provider.
-        */
-        'guards' => [
-            'api' => [
-                'provider' => 'users',
-            ],
-
-            'admin' => [
-                'provider' => 'admins',
-            ],
-        ],
-
-        /*
-        | User Provider configurations.
-        | Each provider maps a guard to a specific user model.
-        */
-        'providers' => [
-            'users' => [
-                'model' => App\Model\Admin,
-            ]
-        ],
-    ],
-
+    'blacklist_grace_period' => (int) env('JWT_BLACKLIST_GRACE_PERIOD', 0),
 
     /*
     |--------------------------------------------------------------------------
-    | Providers
+    | Blacklist Storage
     |--------------------------------------------------------------------------
     |
-    | Override the default provider classes if needed.
+    | Specify the handler that is used to store tokens in the blacklist.
     |
     */
 
-    'providers' => [
-        'jwt' => Lcobucci::class,
-        'auth' => \Kooditorm\Hyperf\Jwt\Providers\Auth\HyperfAuth::class,
-        'storage' => \Kooditorm\Hyperf\Jwt\Providers\Storage\HyperfCache::class,
-    ],
-
+    'blacklist_storage' => Kooditorm\Hyperf\Jwt\Storage\HyperfCache::class,
 ];
+
+

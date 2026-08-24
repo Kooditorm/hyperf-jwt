@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  oswin.hu@gmail.com
  * @license  https://github.com/Kooditorm/hyperf-jwt/blob/master/LICENSE
  */
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -43,13 +44,13 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => \HyperfExtension\Auth\Guards\SessionGuard::class,
+            'driver' => \Kooditorm\Hyperf\Auth\Guards\TokenGuard::class,
             'provider' => 'users',
             'options' => [],
         ],
 
         'api' => [
-            'driver' => \HyperfExtension\Auth\Guards\JwtGuard::class,
+            'driver' => \Kooditorm\Hyperf\Auth\Guards\JwtGuard::class,
             'provider' => 'users',
             'options' => [],
         ],

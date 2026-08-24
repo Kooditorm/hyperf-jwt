@@ -14,6 +14,8 @@ namespace Kooditorm\Hyperf;
 
 use Kooditorm\Hyperf\Auth\Access\GateManager;
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateManagerInterface;
+use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
+use Kooditorm\Hyperf\Auth\AuthManager;
 use Kooditorm\Hyperf\Hash\Contracts\HashInterface;
 use Kooditorm\Hyperf\Hash\HashManager;
 
@@ -26,6 +28,7 @@ class ConfigProvider
         return [
             'dependencies' => [
                 HashInterface::class => HashManager::class,
+                AuthManagerInterface::class => AuthManager::class,
                 GateManagerInterface::class => GateManager::class,
             ],
             'commands' => [
