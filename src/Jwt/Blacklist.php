@@ -14,12 +14,13 @@ namespace Kooditorm\Hyperf\Jwt;
 
 use Kooditorm\Hyperf\Jwt\Contracts\StorageInterface;
 use function Hyperf\Support\value;
+
 class Blacklist
 {
     /**
      * The storage.
      *
-     * @var \Kooditorm\Hyperf\Jwt\Contracts\StorageInterface
+     * @var StorageInterface
      */
     protected $storage;
 
@@ -61,12 +62,12 @@ class Blacklist
     {
         // if there is no exp claim then add the jwt to
         // the blacklist indefinitely
-        if (! $payload->hasKey('exp')) {
+        if (!$payload->hasKey('exp')) {
             return $this->addForever($payload);
         }
 
         // if we have already added this token to the blacklist
-        if (! empty($this->storage->get($this->getKey($payload)))) {
+        if (!empty($this->storage->get($this->getKey($payload)))) {
             return true;
         }
 
@@ -94,7 +95,7 @@ class Blacklist
      */
     public function has(Payload $payload): bool
     {
-        $val = $this->storage->get((string) $this->getKey($payload));
+        $val = $this->storage->get((string)$this->getKey($payload));
 
         // exit early if the token was blacklisted forever,
         if ($val === 'forever') {
@@ -102,7 +103,7 @@ class Blacklist
         }
 
         // check whether the expiry + grace has past
-        return ! empty($val) and ! Utils::isFuture($val['valid_until']);
+        return !empty($val) and !Utils::isFuture($val['valid_until']);
     }
 
     /**
@@ -130,7 +131,7 @@ class Blacklist
      */
     public function setGracePeriod(int $gracePeriod)
     {
-        $this->gracePeriod = (int) $gracePeriod;
+        $this->gracePeriod = (int)$gracePeriod;
 
         return $this;
     }
@@ -172,7 +173,7 @@ class Blacklist
      */
     public function setRefreshTtl(?int $refreshTtl)
     {
-        $this->refreshTtl = $refreshTtl === null ? null : (int) $refreshTtl;
+        $this->refreshTtl = $refreshTtl === null ? null : (int)$refreshTtl;
 
         return $this;
     }
