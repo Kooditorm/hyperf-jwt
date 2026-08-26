@@ -13,8 +13,8 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Hash;
 
 use Hyperf\Contract\ConfigInterface;
-use Kooditorm\Hyperf\Hash\Contracts\DriverInterface;
-use Kooditorm\Hyperf\Hash\Contracts\HashInterface;
+use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
+use Kooditorm\Hyperf\Hash\Contract\HashInterface;
 use Kooditorm\Hyperf\Hash\Driver\BcryptDriver;
 use InvalidArgumentException;
 

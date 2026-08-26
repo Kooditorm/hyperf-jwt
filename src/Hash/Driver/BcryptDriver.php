@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Hash\Driver;
 
-use Kooditorm\Hyperf\Hash\DriverInterface;
+use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
 use RuntimeException;
 class BcryptDriver extends AbstractDriver implements DriverInterface
 {

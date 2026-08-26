@@ -12,10 +12,10 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Hash\Driver;
 
-use Kooditorm\Hyperf\Hash\DriverInterface;
+use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
 use RuntimeException;
 
-class Argon2IDriver extends AbstractDriver implements DriverInterface
+class Argon2iDriver extends AbstractDriver implements DriverInterface
 {
     /**
      * The default memory cost factor.

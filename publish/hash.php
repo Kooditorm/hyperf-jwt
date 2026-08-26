@@ -39,7 +39,7 @@ return [
         */
 
         'bcrypt' => [
-            'class' => \HyperfExtension\Hashing\Driver\BcryptDriver::class,
+            'class' => \Kooditorm\Hyperf\Hash\Driver\BcryptDriver::class,
             'options' => [
                 'rounds' => env('BCRYPT_ROUNDS', 10),
             ],
@@ -57,7 +57,7 @@ return [
         */
 
         'argon2i' => [
-            'class' => \HyperfExtension\Hashing\Driver\Argon2IDriver::class,
+            'class' => \Kooditorm\Hyperf\Hash\Driver\Argon2iDriver::class,
             'options' => [
                 'memory' => 1024,
                 'threads' => 2,
@@ -66,7 +66,7 @@ return [
         ],
 
         'argon2id' => [
-            'class' => \HyperfExtension\Hashing\Driver\Argon2IdDriver::class,
+            'class' => \Kooditorm\Hyperf\Hash\Driver\Argon2IdDriver::class,
             'options' => [
                 'memory' => 1024,
                 'threads' => 2,

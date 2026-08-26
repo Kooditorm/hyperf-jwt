@@ -14,7 +14,7 @@ namespace Kooditorm\Hyperf\Hash\Driver;
 
 use RuntimeException;
 
-class Argon2IdDriver extends Argon2Driver
+class Argon2IdDriver extends Argon2iDriver
 {
     /**
      * Check the given plain value against a hash.
@@ -27,11 +27,7 @@ class Argon2IdDriver extends Argon2Driver
             throw new RuntimeException('This password does not use the Argon2id algorithm.');
         }
 
-        if (strlen($hashedValue) === 0) {
-            return false;
-        }
-
-        return password_verify($value, $hashedValue);
+        return parent::check($value, $hashedValue, $options);
     }
 
     /**
