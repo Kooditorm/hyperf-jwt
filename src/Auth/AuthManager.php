@@ -16,9 +16,12 @@ use Closure;
 use Hyperf\Contract\ConfigInterface;
 use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\GuardInterface;
+use Kooditorm\Hyperf\Auth\Contracts\StatefulGuardInterface;
 use Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface;
+use Kooditorm\Hyperf\Auth\Events\AuthManagerResolved;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 use function Hyperf\Support\make;
 
@@ -29,28 +32,41 @@ class AuthManager extends AuthManagerInterface
     /**
      * The application instance.
      *
-     * @var \Psr\Container\ContainerInterface
+     * @var ContainerInterface
      */
     protected $container;
 
     /**
      * The config instance.
      *
-     * @var \Hyperf\Contract\ConfigInterface
+     * @var ConfigInterface
      */
     protected $config;
 
+    /**
+     * The event dispatcher instance.
+     *
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+
+    /**
+     * Create a new Auth manager instance.
+     */
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->config    = make(ConfigInterface::class);
+        $this->config = $container->get(ConfigInterface::class);
+        $this->eventDispatcher = $container->get(EventDispatcherInterface::class);
+
         $this->resolveUsersUsing($this->getUserResolverClosure());
+        $this->eventDispatcher->dispatch(new AuthManagerResolved($this));
     }
 
     /**
      * Attempt to get the guard from the local cache.
      *
-     * @return \Kooditorm\Hyperf\Auth\Contracts\GuardInterface|\Kooditorm\Hyperf\Auth\Contracts\StatefulGuardInterface
+     * @return GuardInterface|StatefulGuardInterface
      */
     public function guard(?string $name = null): GuardInterface
     {
@@ -136,12 +152,11 @@ class AuthManager extends AuthManagerInterface
         return make($driverClass, ['options' => $config['options'] ?? []]);
     }
 
-
     /**
      * Resolve the given guard.
      *
      *@throws \InvalidArgumentException
-     * @return \Kooditorm\Hyperf\Auth\Contracts\GuardInterface|\HyperfExtension\Auth\Contracts\StatefulGuardInterface
+     * @return GuardInterface|StatefulGuardInterface
      */
     protected function resolve(string $name)
     {
@@ -161,7 +176,6 @@ class AuthManager extends AuthManagerInterface
         return make($config['driver'], compact('provider', 'name', 'options'));
     }
 
-
     protected function getUserResolverClosure()
     {
         return function ($guard = null) {
@@ -178,7 +192,6 @@ class AuthManager extends AuthManagerInterface
         };
     }
 
-
     /**
      * Get the guard configuration.
      */
@@ -186,5 +199,4 @@ class AuthManager extends AuthManagerInterface
     {
         return $this->config->get("auth.guards.{$name}");
     }
-
 }

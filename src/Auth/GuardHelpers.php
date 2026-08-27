@@ -16,7 +16,6 @@ use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 use Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface;
 use Kooditorm\Hyperf\Auth\Exceptions\AuthenticationException;
 
-
 /**
  * These methods are typically the same across all guards.
  */
