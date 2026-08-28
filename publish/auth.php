@@ -73,21 +73,12 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => \HyperfExtension\Auth\UserProviders\ModelUserProvider::class,
+            'driver' => \Kooditorm\Hyperf\Auth\UserProviders\ModelUserProvider::class,
             'options' => [
                 'model' => App\User::class,
                 'hash_driver' => 'bcrypt',
             ],
-        ],
-
-        // 'users' => [
-        //     'driver' => \Hyperf\Auth\UserProvider\DatabaseUserProvider::class,
-        //     'options' => [
-        //         'connection' => 'default',
-        //         'table' => 'users',
-        //         'hash_driver' => 'bcrypt',
-        //     ],
-        // ],
+        ]
     ],
 
     /*
@@ -107,7 +98,7 @@ return [
 
     'passwords' => [
         'users' => [
-            'driver' => \HyperfExtension\Auth\Passwords\DatabaseTokenRepository::class,
+            'driver' => \Kooditorm\Hyperf\Auth\Passwords\DatabaseTokenRepository::class,
             'provider' => 'users',
             'options' => [
                 'connection' => null,

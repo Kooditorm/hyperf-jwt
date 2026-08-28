@@ -20,6 +20,17 @@ use Kooditorm\Hyperf\Auth\Contracts\PasswordBrokerManagerInterface;
 use Kooditorm\Hyperf\Auth\Passwords\PasswordBrokerManager;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
 use Kooditorm\Hyperf\Hash\HashManager;
+use Kooditorm\Hyperf\Jwt\Commands\GenJwtSecretCommand;
+use Kooditorm\Hyperf\Jwt\Contracts\JwtFactoryInterface;
+use Kooditorm\Hyperf\Jwt\Contracts\ManagerInterface;
+use Kooditorm\Hyperf\Jwt\Contracts\PayloadValidatorInterface;
+use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\RequestParserInterface;
+use Kooditorm\Hyperf\Jwt\Contracts\TokenValidatorInterface;
+use Kooditorm\Hyperf\Jwt\JwtFactory;
+use Kooditorm\Hyperf\Jwt\ManagerFactory;
+use Kooditorm\Hyperf\Jwt\RequestParser\RequestParserFactory;
+use Kooditorm\Hyperf\Jwt\Validators\PayloadValidator;
+use Kooditorm\Hyperf\Jwt\Validators\TokenValidator;
 
 
 class ConfigProvider
@@ -33,8 +44,14 @@ class ConfigProvider
                 AuthManagerInterface::class => AuthManager::class,
                 GateManagerInterface::class => GateManager::class,
                 PasswordBrokerManagerInterface::class => PasswordBrokerManager::class,
+                ManagerInterface::class => ManagerFactory::class,
+                TokenValidatorInterface::class => TokenValidator::class,
+                PayloadValidatorInterface::class => PayloadValidator::class,
+                RequestParserInterface::class => RequestParserFactory::class,
+                JwtFactoryInterface::class => JwtFactory::class
             ],
             'commands' => [
+                GenJwtSecretCommand::class
             ],
             'annotations' => [
                 'scan' => [
@@ -58,6 +75,12 @@ class ConfigProvider
                     'description' => 'The config for Kooditorm/Hyperf-jwt/auth package.',
                     'source' => __DIR__ . '/../publish/auth.php',
                     'destination' => BASE_PATH . '/config/autoload/auth.php',
+                ],
+                [
+                    'id' => 'config',
+                    'description' => 'The config for Kooditorm/Hyperf-jwt/jwt package.',
+                    'source' => __DIR__ . '/../publish/jwt.php',
+                    'destination' => BASE_PATH . '/config/autoload/jwt.php',
                 ]
             ]
         ];
