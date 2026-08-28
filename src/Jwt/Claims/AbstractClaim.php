@@ -19,6 +19,7 @@ use Hyperf\Contract\Jsonable;
 use JsonSerializable;
 use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
 use Kooditorm\Hyperf\Jwt\Contracts\ManagerInterface;
+use Kooditorm\Hyperf\Jwt\Claims\Factory;
 
 class AbstractClaim implements ClaimInterface, Arrayable, Jsonable, JsonSerializable
 {
@@ -37,7 +38,7 @@ class AbstractClaim implements ClaimInterface, Arrayable, Jsonable, JsonSerializ
     private $value;
 
     /**
-     * @var \Kooditorm\Hyperf\Jwt\Claims\Factory
+     * @var Factory
      */
     private $factory;
 
