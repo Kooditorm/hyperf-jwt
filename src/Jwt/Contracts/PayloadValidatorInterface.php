@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Jwt\Contracts;
 
 use Kooditorm\Hyperf\Jwt\Claims\Collection;
+
 interface PayloadValidatorInterface
 {
     /**

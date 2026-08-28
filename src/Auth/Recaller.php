@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth;
 
 use Hyperf\Stringable\Str;
+
 class Recaller
 {
     /**

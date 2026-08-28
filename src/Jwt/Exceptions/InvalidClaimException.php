@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Jwt\Exceptions;
 
 use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
+
 class InvalidClaimException extends JwtException
 {
     /**

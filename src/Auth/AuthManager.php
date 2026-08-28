@@ -14,15 +14,14 @@ namespace Kooditorm\Hyperf\Auth;
 
 use Closure;
 use Hyperf\Contract\ConfigInterface;
+use InvalidArgumentException;
 use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\GuardInterface;
 use Kooditorm\Hyperf\Auth\Contracts\StatefulGuardInterface;
 use Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface;
 use Kooditorm\Hyperf\Auth\Events\AuthManagerResolved;
-use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-
 use function Hyperf\Support\make;
 
 class AuthManager extends AuthManagerInterface

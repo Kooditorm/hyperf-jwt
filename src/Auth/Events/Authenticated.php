@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth\Events;
 
 use HyperfExtension\Auth\Contracts\AuthenticatableInterface;
+
 class Authenticated
 {
     /**

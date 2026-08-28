@@ -14,6 +14,7 @@ namespace Kooditorm\Hyperf\Jwt;
 
 use Hyperf\Context\ApplicationContext;
 use Kooditorm\Hyperf\Jwt\Contracts\TokenValidatorInterface;
+
 class Token
 {
     /**

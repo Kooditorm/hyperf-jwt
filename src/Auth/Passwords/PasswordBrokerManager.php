@@ -13,14 +13,14 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth\Passwords;
 
 use Hyperf\Contract\ConfigInterface;
+use InvalidArgumentException;
 use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\PasswordBrokerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\PasswordBrokerManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\TokenRepositoryInterface;
-use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
-
 use function Hyperf\Support\make;
+
 class PasswordBrokerManager implements PasswordBrokerManagerInterface
 {
     /**

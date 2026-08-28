@@ -13,12 +13,12 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Hash;
 
 use Hyperf\Contract\ConfigInterface;
+use InvalidArgumentException;
 use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
 use Kooditorm\Hyperf\Hash\Driver\BcryptDriver;
-use InvalidArgumentException;
-
 use function Hyperf\Support\make;
+
 class HashManager implements HashInterface
 {
     /**

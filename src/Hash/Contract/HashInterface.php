@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Hash\Contract;
 
-use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
-
 interface HashInterface extends DriverInterface
 {
     /**

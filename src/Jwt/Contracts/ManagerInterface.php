@@ -14,6 +14,7 @@ namespace Kooditorm\Hyperf\Jwt\Contracts;
 
 use Kooditorm\Hyperf\Jwt\Payload;
 use Kooditorm\Hyperf\Jwt\Token;
+
 interface ManagerInterface
 {
     /**

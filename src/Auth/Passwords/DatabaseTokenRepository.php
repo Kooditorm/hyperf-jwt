@@ -21,6 +21,7 @@ use Kooditorm\Hyperf\Auth\Contracts\CanResetPasswordInterface;
 use Kooditorm\Hyperf\Auth\Contracts\TokenRepositoryInterface;
 use Kooditorm\Hyperf\Hash\Contract\DriverInterface as HasherInterface;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
+
 class DatabaseTokenRepository implements TokenRepositoryInterface
 {
     /**

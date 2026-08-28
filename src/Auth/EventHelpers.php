@@ -21,6 +21,7 @@ use Kooditorm\Hyperf\Auth\Events\Login;
 use Kooditorm\Hyperf\Auth\Events\Logout;
 use Kooditorm\Hyperf\Auth\Events\OtherDeviceLogout;
 use Kooditorm\Hyperf\Auth\Events\Validated;
+
 trait EventHelpers
 {
     /**

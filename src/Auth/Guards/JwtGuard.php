@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Auth\Guards;
 
-use BadMethodCallException;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Macroable\Macroable;
 use Kooditorm\Hyperf\Auth\Contracts\StatelessGuardInterface;

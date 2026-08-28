@@ -12,10 +12,6 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Auth\Contracts;
 
-use Kooditorm\Hyperf\Auth\Contracts\GuardInterface;
-use Kooditorm\Hyperf\Auth\Contracts\StatelessGuardInterface;
-use Kooditorm\Hyperf\Auth\Contracts\StatefulGuardInterface;
-
 interface AuthManagerInterface
 {
     /**

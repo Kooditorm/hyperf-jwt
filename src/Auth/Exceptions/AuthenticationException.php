@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth\Exceptions;
 
 use Exception;
+
 class AuthenticationException extends Exception
 {
     /**

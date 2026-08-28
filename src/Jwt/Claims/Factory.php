@@ -16,8 +16,8 @@ use Hyperf\Context\ApplicationContext;
 use Hyperf\Stringable\Str;
 use HyperfExtension\Jwt\Contracts\ClaimInterface;
 use Psr\Http\Message\ServerRequestInterface;
-
 use function Hyperf\Support\make;
+
 class Factory
 {
     /**

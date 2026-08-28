@@ -16,9 +16,10 @@ namespace Kooditorm\Hyperf\Jwt\Claims;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Contract\Arrayable;
 use Hyperf\Contract\Jsonable;
+use JsonSerializable;
 use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
 use Kooditorm\Hyperf\Jwt\Contracts\ManagerInterface;
-use JsonSerializable;
+
 class AbstractClaim implements ClaimInterface, Arrayable, Jsonable, JsonSerializable
 {
     /**

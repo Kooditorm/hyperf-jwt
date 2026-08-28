@@ -12,15 +12,16 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Auth\UserProviders;
 
+use Hyperf\Contract\Arrayable;
 use Hyperf\Database\ConnectionInterface;
 use Hyperf\Database\ConnectionResolverInterface;
-use Hyperf\Contract\Arrayable;
 use Hyperf\Stringable\Str;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 use Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface;
 use Kooditorm\Hyperf\Auth\GenericUser;
 use Kooditorm\Hyperf\Hash\Contract\DriverInterface as HasherInterface;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
+
 class DatabaseUserProvider implements UserProviderInterface
 {
     /**

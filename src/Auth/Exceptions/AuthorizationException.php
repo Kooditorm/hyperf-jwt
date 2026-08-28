@@ -15,6 +15,7 @@ namespace Kooditorm\Hyperf\Auth\Exceptions;
 use Exception;
 use Kooditorm\Hyperf\Auth\Access\Response;
 use Throwable;
+
 class AuthorizationException extends Exception
 {
     /**

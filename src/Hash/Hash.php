@@ -16,6 +16,7 @@ namespace Kooditorm\Hyperf\Hash;
 use Hyperf\Context\ApplicationContext;
 use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
+
 abstract class Hash
 {
     public static function getDriver(?string $name = null): DriverInterface

@@ -13,14 +13,13 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf;
 
 use Kooditorm\Hyperf\Auth\Access\GateManager;
+use Kooditorm\Hyperf\Auth\AuthManager;
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
-use Kooditorm\Hyperf\Auth\AuthManager;
 use Kooditorm\Hyperf\Auth\Contracts\PasswordBrokerManagerInterface;
 use Kooditorm\Hyperf\Auth\Passwords\PasswordBrokerManager;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
 use Kooditorm\Hyperf\Hash\HashManager;
-
 
 
 class ConfigProvider

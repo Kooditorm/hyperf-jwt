@@ -18,6 +18,7 @@ use Kooditorm\Hyperf\Auth\Contracts\GuardInterface;
 use Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface;
 use Kooditorm\Hyperf\Auth\GuardHelpers;
 use Psr\Http\Message\ServerRequestInterface;
+
 class TokenGuard implements GuardInterface
 {
     use GuardHelpers;

@@ -18,7 +18,6 @@ use Kooditorm\Hyperf\Jwt\Contracts\CodecInterface;
 use Kooditorm\Hyperf\Jwt\Exceptions\InvalidConfigException;
 use Kooditorm\Hyperf\Jwt\Storage\HyperfCache;
 use Psr\Container\ContainerInterface;
-
 use function Hyperf\Utils\make;
 
 class ManagerFactory

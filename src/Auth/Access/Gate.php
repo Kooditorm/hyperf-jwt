@@ -13,16 +13,15 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth\Access;
 
 use Exception;
-use Hyperf\Contract\ContainerInterface;
 use Hyperf\Collection\Arr;
+use Hyperf\Contract\ContainerInterface;
 use Hyperf\Stringable\Str;
+use InvalidArgumentException;
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateInterface;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 use Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException;
-use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionFunction;
-
 use function Hyperf\Collection\collect;
 use function Hyperf\Support\class_basename;
 

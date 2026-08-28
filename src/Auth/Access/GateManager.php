@@ -20,7 +20,6 @@ use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 use Kooditorm\Hyperf\Auth\Events\GateManagerResolved;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-
 use function Hyperf\Support\call;
 use function Hyperf\Support\make;
 

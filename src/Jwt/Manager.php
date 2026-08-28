@@ -12,10 +12,10 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt;
 
-use Kooditorm\Hyperf\Jwt\Contracts\ManagerInterface;
 use Hyperf\Collection\Arr;
 use Kooditorm\Hyperf\Jwt\Claims\Factory as ClaimFactory;
 use Kooditorm\Hyperf\Jwt\Contracts\CodecInterface;
+use Kooditorm\Hyperf\Jwt\Contracts\ManagerInterface;
 use Kooditorm\Hyperf\Jwt\Exceptions\JwtException;
 use Kooditorm\Hyperf\Jwt\Exceptions\TokenBlacklistedException;
 

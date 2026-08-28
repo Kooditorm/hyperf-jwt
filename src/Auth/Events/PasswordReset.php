@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth\Events;
 
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
+
 class PasswordReset
 {
     /**

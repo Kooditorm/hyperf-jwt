@@ -15,6 +15,7 @@ namespace Kooditorm\Hyperf\Jwt;
 use Kooditorm\Hyperf\Jwt\Claims\Collection;
 use Kooditorm\Hyperf\Jwt\Claims\Factory as ClaimFactory;
 use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
+
 class PayloadFactory
 {
     /**

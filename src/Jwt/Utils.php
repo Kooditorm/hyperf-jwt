@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Jwt;
 
 use Carbon\Carbon;
+
 class Utils
 {
     /**

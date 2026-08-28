@@ -14,6 +14,7 @@ namespace Kooditorm\Hyperf\Jwt\Claims;
 
 
 use Hyperf\Collection\Collection as HyperfCollection;
+
 class Collection extends HyperfCollection
 {
     /**

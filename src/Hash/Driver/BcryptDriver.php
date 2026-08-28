@@ -14,6 +14,7 @@ namespace Kooditorm\Hyperf\Hash\Driver;
 
 use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
 use RuntimeException;
+
 class BcryptDriver extends AbstractDriver implements DriverInterface
 {
     /**

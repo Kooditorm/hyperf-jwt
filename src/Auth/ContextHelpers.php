@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth;
 
 use Hyperf\Context\Context;
+
 trait ContextHelpers
 {
     public function setContext(string $id, $value)

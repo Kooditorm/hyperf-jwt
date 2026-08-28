@@ -14,6 +14,7 @@ namespace Kooditorm\Hyperf\Auth\Access;
 
 use Hyperf\Context\ApplicationContext;
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateManagerInterface;
+
 trait Authorizable
 {
     /**
