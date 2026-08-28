@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Contracts;
 
+use Kooditorm\Hyperf\Jwt\Exceptions\InvalidClaimException;
+
 interface ClaimInterface
 {
     /**
@@ -19,7 +21,7 @@ interface ClaimInterface
      *
      * @param mixed $value
      *
-     * @throws \Kooditorm\Hyperf\Jwt\Exceptions\InvalidClaimException
+     * @throws InvalidClaimException
      *
      * @return $this
      */
