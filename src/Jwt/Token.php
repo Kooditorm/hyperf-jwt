@@ -23,7 +23,7 @@ class Token
     private $value;
 
     /**
-     * @var \Kooditorm\Hyperf\Jwt\Contracts\TokenValidatorInterface
+     * @var TokenValidatorInterface
      */
     private $validator;
 
