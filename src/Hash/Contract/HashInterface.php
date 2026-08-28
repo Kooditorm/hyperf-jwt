@@ -12,12 +12,14 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Hash\Contract;
 
+use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
+
 interface HashInterface extends DriverInterface
 {
     /**
      * Get a driver instance.
      *
-     * @return \Kooditorm\Hyperf\Hash\Contract\DriverInterface
+     * @return DriverInterface
      */
     public function getDriver(?string $name = null): DriverInterface;
 }

@@ -11,12 +11,17 @@ declare(strict_types=1);
  */
 
 namespace Kooditorm\Hyperf\Auth\Contracts;
+
+use Kooditorm\Hyperf\Auth\Contracts\GuardInterface;
+use Kooditorm\Hyperf\Auth\Contracts\StatelessGuardInterface;
+use Kooditorm\Hyperf\Auth\Contracts\StatefulGuardInterface;
+
 interface AuthManagerInterface
 {
     /**
      * Get a guard instance by name.
      *
-     * @return \Kooditorm\Hyperf\Auth\Contracts\GuardInterface|\Kooditorm\Hyperf\Auth\Contracts\StatefulGuardInterface|\Kooditorm\Hyperf\Auth\Contracts\StatelessGuardInterface
+     * @return GuardInterface|StatefulGuardInterface|StatelessGuardInterface
      */
     public function guard(?string $name = null): GuardInterface;
 
