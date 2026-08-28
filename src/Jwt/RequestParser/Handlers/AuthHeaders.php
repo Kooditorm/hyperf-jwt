@@ -14,7 +14,7 @@ namespace Kooditorm\Hyperf\Jwt\RequestParser\Handlers;
 
 use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\HandlerInterface as ParserContract;
 use Psr\Http\Message\ServerRequestInterface;
-class AuthHeaders extends ParserContract
+class AuthHeaders implements ParserContract
 {
     /**
      * The header name.

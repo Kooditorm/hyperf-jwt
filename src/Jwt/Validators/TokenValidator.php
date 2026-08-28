@@ -16,7 +16,7 @@ use Kooditorm\Hyperf\Jwt\Contracts\TokenValidatorInterface;
 use Kooditorm\Hyperf\Jwt\Exceptions\JwtException;
 use Kooditorm\Hyperf\Jwt\Exceptions\TokenInvalidException;
 
-class TokenValidator extends TokenValidatorInterface
+class TokenValidator implements TokenValidatorInterface
 {
     /**
      * Check the structure of the token.

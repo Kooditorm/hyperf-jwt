@@ -15,7 +15,7 @@ namespace Kooditorm\Hyperf\Jwt\Storage;
 use Kooditorm\Hyperf\Jwt\Contracts\StorageInterface;
 use Psr\SimpleCache\CacheInterface;
 
-class HyperfCache extends StorageInterface
+class HyperfCache implements StorageInterface
 {
     /**
      * The cache repository contract.
