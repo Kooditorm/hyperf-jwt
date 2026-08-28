@@ -11,6 +11,9 @@ declare(strict_types=1);
  */
 
 namespace Kooditorm\Hyperf\Auth\Contracts\Access;
+
+use Kooditorm\Hyperf\Auth\Access\Response;
+
 interface GateInterface
 {
     /**
