@@ -15,6 +15,10 @@ namespace Kooditorm\Hyperf\Auth\Guards;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Macroable\Macroable;
 use Kooditorm\Hyperf\Auth\Contracts\StatelessGuardInterface;
+use Kooditorm\Hyperf\Auth\GuardHelpers;
+use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
+use Hyperf\Contract\ContainerInterface;
+use Kooditorm\Hyperf\Jwt\Jwt;
 
 class JwtGuard implements StatelessGuardInterface
 {
@@ -35,22 +39,22 @@ class JwtGuard implements StatelessGuardInterface
     /**
      * The user we last attempted to retrieve.
      *
-     * @var \Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface
+     * @var AuthenticatableInterface
      */
     protected $lastAttempted;
 
     /**
-     * @var \Hyperf\Contract\ContainerInterface
+     * @var ContainerInterface
      */
     protected $container;
 
     /**
-     * @var \Kooditorm\Hyperf\Jwt\Jwt
+     * @var Jwt
      */
     protected $jwt;
 
     /**
-     * @var \Hyperf\HttpServer\Contract\RequestInterface
+     * @var RequestInterface
      */
     protected $request;
 }
