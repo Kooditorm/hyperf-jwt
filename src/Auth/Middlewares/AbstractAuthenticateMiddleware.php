@@ -19,7 +19,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class AbstractAuthenticateMiddleware implements MiddlewareInterface
+abstract class AbstractAuthenticateMiddleware implements MiddlewareInterface
 {
     /**
      * The authentication factory instance.
