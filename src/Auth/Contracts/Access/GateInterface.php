@@ -14,6 +14,7 @@ namespace Kooditorm\Hyperf\Auth\Contracts\Access;
 
 use Kooditorm\Hyperf\Auth\Access\Response;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
+use Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException;
 
 interface GateInterface
 {
@@ -104,7 +105,7 @@ interface GateInterface
      *
      * @param array|mixed $arguments
      *
-     * @throws \Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException
+     * @throws AuthorizationException
      */
     public function authorize(string $ability, $arguments = []): Response;
 
@@ -120,8 +121,8 @@ interface GateInterface
      *
      * @param array|mixed $arguments
      *
-     *@throws \Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException
-     * @return null|bool|\Kooditorm\Hyperf\Auth\Access\Response
+     * @throws AuthorizationException
+     * @return null|bool|Response
      */
     public function raw(string $ability, $arguments = []);
 
