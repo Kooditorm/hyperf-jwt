@@ -307,7 +307,7 @@ class Gate implements GateInterface
      * @param array|mixed $arguments
      *
      *@throws \Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException
-     * @return null|bool|\HyperfExtension\Auth\Access\Response
+     * @return null|bool|\Kooditorm\Hyperf\Auth\Access\Response
      */
     public function raw(string $ability, $arguments = [])
     {
@@ -545,7 +545,7 @@ class Gate implements GateInterface
      * Resolve and call the appropriate authorization callback.
      *
      * @throws \ReflectionException
-     * @return bool|\HyperfExtension\Auth\Access\Response
+     * @return bool|\Kooditorm\Hyperf\Auth\Access\Response
      */
     protected function callAuthCallback(?AuthenticatableInterface $user, string $ability, array $arguments)
     {

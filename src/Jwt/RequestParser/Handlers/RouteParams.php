@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\RequestParser\Handlers;
 
-use HyperfExtension\Jwt\Contracts\RequestParser\HandlerInterface as ParserContract;
+use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\HandlerInterface as ParserContract;
 use Psr\Http\Message\ServerRequestInterface;
 use Hyperf\HttpServer\Request;
 

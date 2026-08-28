@@ -62,7 +62,7 @@ class Response implements Arrayable
      * Create a new "allow" Response.
      *
      * @param mixed $code
-     * @return \HyperfExtension\Auth\Access\Response
+     * @return \Kooditorm\Hyperf\Auth\Access\Response
      */
     public static function allow(?string $message = null, $code = null): Response
     {
@@ -73,7 +73,7 @@ class Response implements Arrayable
      * Create a new "deny" Response.
      *
      * @param mixed $code
-     * @return \HyperfExtension\Auth\Access\Response
+     * @return \Kooditorm\Hyperf\Auth\Access\Response
      */
     public static function deny(?string $message = null, $code = null): Response
     {
@@ -117,7 +117,7 @@ class Response implements Arrayable
     /**
      * Throw authorization exception if response was denied.
      *
-     *@throws \HyperfExtension\Auth\Exceptions\AuthorizationException
+     *@throws \Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException
      * @return $this
      */
     public function authorize(): Response

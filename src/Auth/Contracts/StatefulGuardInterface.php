@@ -28,7 +28,7 @@ interface StatefulGuardInterface extends GuardInterface
     /**
      * Log a user into the application.
      *
-     * @param \HyperfExtension\Auth\Contracts\AuthenticatableInterface $user
+     * @param \Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface $user
      * @return mixed|void
      */
     public function login(AuthenticatableInterface $user, bool $remember = false);
@@ -38,7 +38,7 @@ interface StatefulGuardInterface extends GuardInterface
      *
      * @param mixed $id
      *
-     * @return \HyperfExtension\Auth\Contracts\AuthenticatableInterface
+     * @return \Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface
      */
     public function loginUsingId($id, bool $remember = false): ?AuthenticatableInterface;
 
@@ -47,7 +47,7 @@ interface StatefulGuardInterface extends GuardInterface
      *
      * @param mixed $id
      *
-     * @return bool|\HyperfExtension\Auth\Contracts\AuthenticatableInterface
+     * @return bool|\Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface
      */
     public function onceUsingId($id);
 

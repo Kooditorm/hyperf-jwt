@@ -113,6 +113,14 @@ class AbstractClaim implements ClaimInterface, Arrayable, Jsonable, JsonSerializ
     }
 
     /**
+     * Validate the Claim value.
+     */
+    public function validate(bool $ignoreExpired = false): bool
+    {
+        return true;
+    }
+
+    /**
      * Checks if the value matches the claim.
      *
      * @param mixed $value

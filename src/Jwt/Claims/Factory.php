@@ -14,7 +14,7 @@ namespace Kooditorm\Hyperf\Jwt\Claims;
 
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Stringable\Str;
-use HyperfExtension\Jwt\Contracts\ClaimInterface;
+use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use function Hyperf\Support\make;
 

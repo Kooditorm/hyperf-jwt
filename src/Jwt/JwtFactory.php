@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Jwt;
 
 use Hyperf\Contract\ConfigInterface;
-use HyperfExtension\Jwt\Contracts\JwtFactoryInterface;
+use Kooditorm\Hyperf\Jwt\Contracts\JwtFactoryInterface;
 
 use function Hyperf\Support\make;
 
