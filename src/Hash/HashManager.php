@@ -83,11 +83,11 @@ class HashManager implements HashInterface
             return $this->drivers[$name];
         }
 
-        $name = $name ?: $this->config->get('hashing.default', 'bcrypt');
+        $name = $name ?: $this->config->get('hash.default', 'bcrypt');
 
-        $config = $this->config->get("hashing.driver.{$name}");
+        $config = $this->config->get("hash.driver.{$name}");
         if (empty($config) or empty($config['class'])) {
-            throw new InvalidArgumentException(sprintf('The hashing driver config %s is invalid.', $name));
+            throw new InvalidArgumentException(sprintf('The hash driver config %s is invalid.', $name));
         }
 
         $driverClass = $config['class'] ?? BcryptDriver::class;
