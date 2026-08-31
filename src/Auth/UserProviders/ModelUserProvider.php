@@ -19,7 +19,7 @@ use Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface;
 use Kooditorm\Hyperf\Hash\Contract\DriverInterface as HasherInterface;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
 
-class ModelUserProvider
+class ModelUserProvider implements UserProviderInterface
 {
     /**
      * The hasher implementation.
