@@ -13,8 +13,9 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth;
 
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface as UserContract;
+use Kooditorm\Hyperf\Jwt\Contracts\JwtSubjectInterface;
 
-class GenericUser implements UserContract
+class GenericUser implements UserContract, JwtSubjectInterface
 {
     /**
      * All of the user's attributes.
@@ -115,5 +116,23 @@ class GenericUser implements UserContract
     public function getRememberTokenName(): ?string
     {
         return 'remember_token';
+    }
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJwtIdentifier()
+    {
+        return $this->getAuthIdentifier();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     */
+    public function getJwtCustomClaims(): array
+    {
+        return [];
     }
 }
