@@ -65,19 +65,19 @@ class ConfigProvider
             ],
             'publish' => [
                 [
-                    'id' => 'config',
+                    'id' => 'config.hash',
                     'description' => 'The config for Kooditorm/Hyperf-jwt/hash package.',
                     'source' => __DIR__ . '/../publish/hash.php',
                     'destination' => BASE_PATH . '/config/autoload/hash.php',
                 ],
                 [
-                    'id' => 'config',
+                    'id' => 'config.auth',
                     'description' => 'The config for Kooditorm/Hyperf-jwt/auth package.',
                     'source' => __DIR__ . '/../publish/auth.php',
                     'destination' => BASE_PATH . '/config/autoload/auth.php',
                 ],
                 [
-                    'id' => 'config',
+                    'id' => 'config.jwt',
                     'description' => 'The config for Kooditorm/Hyperf-jwt/jwt package.',
                     'source' => __DIR__ . '/../publish/jwt.php',
                     'destination' => BASE_PATH . '/config/autoload/jwt.php',
