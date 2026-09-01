@@ -1,10 +1,16 @@
 {
     "name": "kooditorm/hyperf-jwt",
-    "description": "JSON Web Token Authentication for Hyperf, adapted from tymon/jwt-auth",
+    "description": "JSON Web Token (JWT) authentication and authorization component for Hyperf, featuring full-featured Auth guards, Gate policies, password reset and hashing support",
     "keywords": [
         "auth",
         "authentication",
+        "authorization",
         "jwt",
+        "token",
+        "guard",
+        "policy",
+        "password reset",
+        "hash",
         "hyperf",
         "json web token"
     ],
