@@ -46,6 +46,13 @@ class TokenGuard implements GuardInterface
     protected $storageKey;
 
     /**
+     * Indicates if the API token is hashed in storage.
+     *
+     * @var bool
+     */
+    protected $hash = false;
+
+    /**
      * Create a new authentication guard.
      */
     public function __construct(
@@ -58,6 +65,7 @@ class TokenGuard implements GuardInterface
         $this->provider = $provider;
         $this->inputKey = $options['input_key'] ?? 'api_token';
         $this->storageKey = $options['storage_key'] ?? 'api_token';
+        $this->hash = $options['hash'] ?? false;
     }
 
     /**
@@ -78,7 +86,7 @@ class TokenGuard implements GuardInterface
 
         if (! empty($token)) {
             $user = $this->provider->retrieveByCredentials([
-                $this->storageKey => $token,
+                $this->storageKey => $this->hash ? hash('sha256', $token) : $token,
             ]);
         }
 

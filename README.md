@@ -636,6 +636,7 @@ $guard->logout();
 | --- | --- | --- |
 | `input_key` | `api_token` | 从 query / input 中读取 token 的字段名 |
 | `storage_key` | `api_token` | 用户表中存储 token 的字段名 |
+| `hash` | `false` | 是否以 sha256 哈希形式存储 token |
 
 ### 用户提供者（Providers）
 
