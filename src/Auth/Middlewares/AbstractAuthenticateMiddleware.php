@@ -24,7 +24,7 @@ abstract class AbstractAuthenticateMiddleware implements MiddlewareInterface
     /**
      * The authentication factory instance.
      *
-     * @var \Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface
+     * @var AuthManagerInterface
      */
     protected $auth;
 
@@ -38,7 +38,7 @@ abstract class AbstractAuthenticateMiddleware implements MiddlewareInterface
 
     /**
      * {@inheritdoc}
-     * @throws \Kooditorm\Hyperf\Auth\Exceptions\AuthenticationException
+     * @throws AuthenticationException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -49,7 +49,7 @@ abstract class AbstractAuthenticateMiddleware implements MiddlewareInterface
     /**
      * Determine if the user is logged in to any of the given guards.
      *
-     * @throws \Kooditorm\Hyperf\Auth\Exceptions\AuthenticationException
+     * @throws AuthenticationException
      */
     protected function authenticate(ServerRequestInterface $request, array $guards): void
     {
@@ -70,7 +70,7 @@ abstract class AbstractAuthenticateMiddleware implements MiddlewareInterface
     /**
      * Handle an unauthenticated user.
      *
-     * @throws \Kooditorm\Hyperf\Auth\Exceptions\AuthenticationException
+     * @throws AuthenticationException
      */
     protected function unauthenticated(ServerRequestInterface $request, array $guards): void
     {

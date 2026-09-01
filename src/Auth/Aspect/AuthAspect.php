@@ -19,6 +19,7 @@ use Hyperf\Di\Aop\ProceedingJoinPoint;
 use Kooditorm\Hyperf\Auth\Annotations\Auth;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 use Kooditorm\Hyperf\Auth\Exceptions\AuthenticationException;
+use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 
 
 /**
@@ -32,7 +33,7 @@ class AuthAspect extends  AbstractAspect
 
     /**
      * @Inject
-     * @var \Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface
+     * @var AuthManagerInterface
      */
     protected $auth;
 
