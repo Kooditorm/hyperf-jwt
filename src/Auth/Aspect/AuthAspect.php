@@ -22,20 +22,19 @@ use Kooditorm\Hyperf\Auth\Exceptions\AuthenticationException;
 use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 
 
-/**
- * @Aspect
- */
+#[Aspect]
 class AuthAspect extends  AbstractAspect
 {
+
     public array $annotations = [
         Auth::class,
     ];
 
     /**
-     * @Inject
      * @var AuthManagerInterface
      */
-    protected $auth;
+    #[Inject]
+    protected AuthManagerInterface $auth;
 
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
