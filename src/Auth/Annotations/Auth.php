@@ -23,18 +23,21 @@ class Auth extends AbstractAnnotation
     /**
      * @var string[]
      */
-    public $guards;
+    public array $guards = [];
 
     /**
      * @var bool
      */
-    public $passable;
+    public bool $passable;
 
     public function __construct($value = null)
     {
-        if (isset($value['value'])) {
-            $value['value'] = empty($value['value']) ? [] : (is_array($value['value']) ? array_unique($value['value']) : [$value['value']]);
-            $this->guards = $value['value'];
+        if (!empty($value['value'])) {
+            if (!empty($value['value']) && is_array($value['value'])){
+                $this->guards = array_unique($value['value']);
+            } else {
+                $this->guards = [$value['value']];
+            }
         }
         if (isset($value['passable'])) {
             $this->passable = (bool) $value['passable'];
