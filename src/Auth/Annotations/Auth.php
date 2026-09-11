@@ -32,7 +32,7 @@ class Auth extends AbstractAnnotation
 
     public function __construct($value = null)
     {
-        if (!empty($value['value'])) {
+        if (isset($value['value'])) {
             if (!empty($value['value']) && is_array($value['value'])){
                 $this->guards = array_unique($value['value']);
             } else {
