@@ -48,7 +48,7 @@ class AuthAspect extends  AbstractAspect
         foreach ($guards as $name) {
             $guard = $this->auth->guard($name);
 
-            if (! $guard->user() instanceof AuthenticatableInterface and ! $passable) {
+            if (!$passable && !$guard->user() instanceof AuthenticatableInterface) {
                 throw new AuthenticationException('Unauthenticated.', $guards);
             }
         }
