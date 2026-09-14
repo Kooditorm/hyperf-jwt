@@ -20,7 +20,7 @@ use Hyperf\Di\Annotation\AbstractAnnotation;
 class Auth extends AbstractAnnotation
 {
     /**
-     * @var array
+     * @var string[]
      */
     public array $guards = [];
 
@@ -29,17 +29,17 @@ class Auth extends AbstractAnnotation
      */
     public bool $passable;
 
-    public function __construct(array|string $guards, bool $passable = false)
+    public function __construct($value = null)
     {
-        if (!empty($guards)) {
-            if (is_array($guards)) {
-                $this->guards = array_unique($guards);
+        if (isset($value['value'])) {
+            if (!empty($value['value']) && is_array($value['value'])){
+                $this->guards = array_unique($value['value']);
             } else {
-                $this->guards = [$guards];
+                $this->guards = [$value['value']];
             }
         }
         if (isset($value['passable'])) {
-            $this->passable = $passable;
+            $this->passable = (bool) $value['passable'];
         }
     }
 }
