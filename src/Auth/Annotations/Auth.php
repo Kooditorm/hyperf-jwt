@@ -13,33 +13,32 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth\Annotations;
 
 use Attribute;
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Di\Annotation\AbstractAnnotation;
+use Hyperf\Di\Annotation\Inject;
 
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS)]
 class Auth extends AbstractAnnotation
 {
+    #[Inject]
+    protected ConfigInterface $config;
+
     /**
-     * @var string[]
+     * @var array
      */
-    public array $guards = [];
+    public array $guards;
 
     /**
      * @var bool
      */
     public bool $passable;
 
-    public function __construct($value = null)
+    public function __construct(array|string|null $guards = null, bool $passable = false)
     {
-        if (isset($value['value'])) {
-            if (!empty($value['value']) && is_array($value['value'])){
-                $this->guards = array_unique($value['value']);
-            } else {
-                $this->guards = [$value['value']];
-            }
-        }
-        if (isset($value['passable'])) {
-            $this->passable = (bool) $value['passable'];
-        }
+        $guards = empty($guards) ? $this->config->get('auth.default.guard') : $guards;
+        $this->guards = is_array($guards) ? array_unique($guards) : [$guards];
+        $this->passable = $passable;
+
     }
 }
