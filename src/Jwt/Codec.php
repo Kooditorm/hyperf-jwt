@@ -105,7 +105,7 @@ class Codec implements CodecInterface
      *
      * @throws JwtException
      */
-    public function __construct(string $secret, string $algo, array $keys, Configuration $config = null)
+    public function __construct(string $secret, string $algo, array $keys, $config = null)
     {
         $this->secret = $secret;
         $this->algo = $algo;
