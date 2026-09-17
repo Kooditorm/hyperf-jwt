@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Claims;
 
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenExpiredException;
+
 class Expiration extends AbstractClaim
 {
     use DatetimeTrait;
