@@ -15,6 +15,9 @@ namespace Kooditorm\Hyperf\Auth\Access;
 use Hyperf\Context\ApplicationContext;
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
+use Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 trait AuthorizesRequests
 {
@@ -23,16 +26,15 @@ trait AuthorizesRequests
      *
      * @param mixed $ability
      * @param array|mixed $arguments
-     * @throws \Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException
-     * @return \Kooditorm\Hyperf\Auth\Access\Response
+     * @throws AuthorizationException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function authorize($ability, $arguments = [])
+    public function authorize(mixed $ability, mixed $arguments = []): Response
     {
         [$ability, $arguments] = $this->parseAbilityAndArguments($ability, $arguments);
 
-        return ApplicationContext::getContainer()
-            ->get(GateManagerInterface::class)
-            ->authorize($ability, $arguments);
+        return $this->gateManager()->authorize($ability, $arguments);
     }
 
     /**
@@ -40,15 +42,15 @@ trait AuthorizesRequests
      *
      * @param mixed $ability
      * @param array|mixed $arguments
-     * @throws \Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException
-     * @return \Kooditorm\Hyperf\Auth\Access\Response
+     * @throws AuthorizationException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function authorizeForUser(AuthenticatableInterface $user, $ability, $arguments = [])
+    public function authorizeForUser(AuthenticatableInterface $user, mixed $ability, mixed $arguments = []): Response
     {
         [$ability, $arguments] = $this->parseAbilityAndArguments($ability, $arguments);
 
-        return ApplicationContext::getContainer()
-            ->get(GateManagerInterface::class)
+        return $this->gateManager()
             ->forUser($user)
             ->authorize($ability, $arguments);
     }
@@ -59,13 +61,13 @@ trait AuthorizesRequests
      * @param mixed $ability
      * @param array|mixed $arguments
      */
-    protected function parseAbilityAndArguments($ability, $arguments): array
+    protected function parseAbilityAndArguments(mixed $ability, mixed $arguments): array
     {
-        if (is_string($ability) && strpos($ability, '\\') === false) {
+        if (is_string($ability) && ! str_contains($ability, '\\')) {
             return [$ability, $arguments];
         }
 
-        $method = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[2]['function'];
+        $method = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[2]['function'] ?? '';
 
         return [$this->normalizeGuessedAbilityName($method), $ability];
     }
@@ -102,5 +104,16 @@ trait AuthorizesRequests
     protected function resourceMethodsWithoutModels(): array
     {
         return ['index', 'create', 'store'];
+    }
+
+    /**
+     * Resolve the gate manager from the container.
+     *
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    protected function gateManager(): GateManagerInterface
+    {
+        return ApplicationContext::getContainer()->get(GateManagerInterface::class);
     }
 }

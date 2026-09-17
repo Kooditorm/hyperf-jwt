@@ -19,31 +19,25 @@ class Response implements Arrayable
 {
     /**
      * Indicates whether the response was allowed.
-     *
-     * @var bool
      */
-    protected $allowed;
+    protected bool $allowed;
 
     /**
      * The response message.
-     *
-     * @var null|string
      */
-    protected $message;
+    protected ?string $message;
 
     /**
      * The response code.
-     *
-     * @var mixed
      */
-    protected $code;
+    protected mixed $code;
 
     /**
      * Create a new response.
      *
      * @param mixed $code
      */
-    public function __construct(bool $allowed, ?string $message = null, $code = null)
+    public function __construct(bool $allowed, ?string $message = null, mixed $code = null)
     {
         $this->code = $code;
         $this->allowed = $allowed;
@@ -62,9 +56,8 @@ class Response implements Arrayable
      * Create a new "allow" Response.
      *
      * @param mixed $code
-     * @return \Kooditorm\Hyperf\Auth\Access\Response
      */
-    public static function allow(?string $message = null, $code = null): Response
+    public static function allow(?string $message = null, mixed $code = null): static
     {
         return new static(true, $message, $code);
     }
@@ -73,9 +66,8 @@ class Response implements Arrayable
      * Create a new "deny" Response.
      *
      * @param mixed $code
-     * @return \Kooditorm\Hyperf\Auth\Access\Response
      */
-    public static function deny(?string $message = null, $code = null): Response
+    public static function deny(?string $message = null, mixed $code = null): static
     {
         return new static(false, $message, $code);
     }
@@ -106,10 +98,8 @@ class Response implements Arrayable
 
     /**
      * Get the response code / reason.
-     *
-     * @return mixed
      */
-    public function code()
+    public function code(): mixed
     {
         return $this->code;
     }
@@ -117,10 +107,9 @@ class Response implements Arrayable
     /**
      * Throw authorization exception if response was denied.
      *
-     *@throws \Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException
-     * @return $this
+     * @throws AuthorizationException
      */
-    public function authorize(): Response
+    public function authorize(): static
     {
         if ($this->denied()) {
             throw (new AuthorizationException($this->message(), $this->code()))

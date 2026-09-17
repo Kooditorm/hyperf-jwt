@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Auth\Access;
 
-use Exception;
+use Closure;
 use Hyperf\Collection\Arr;
 use Hyperf\Contract\ContainerInterface;
 use Hyperf\Stringable\Str;
@@ -21,8 +21,10 @@ use Kooditorm\Hyperf\Auth\Contracts\Access\GateInterface;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 use Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionFunction;
-use function Hyperf\Collection\collect;
+use ReflectionParameter;
+use Traversable;
 use function Hyperf\Support\class_basename;
 
 class Gate implements GateInterface
@@ -32,9 +34,9 @@ class Gate implements GateInterface
     /**
      * The container instance.
      *
-     * @var \Hyperf\Contract\ContainerInterface
+     * @var ContainerInterface
      */
-    protected $container;
+    protected ContainerInterface $container;
 
     /**
      * The user resolver callable.
@@ -46,37 +48,37 @@ class Gate implements GateInterface
     /**
      * All of the defined abilities.
      *
-     * @var array
+     * @var array<string, callable>
      */
-    protected $abilities = [];
+    protected array $abilities = [];
 
     /**
      * All of the defined policies.
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected $policies = [];
+    protected array $policies = [];
 
     /**
      * All of the registered before callbacks.
      *
-     * @var array
+     * @var array<int, callable>
      */
-    protected $beforeCallbacks = [];
+    protected array $beforeCallbacks = [];
 
     /**
      * All of the registered after callbacks.
      *
-     * @var array
+     * @var array<int, callable>
      */
-    protected $afterCallbacks = [];
+    protected array $afterCallbacks = [];
 
     /**
      * All of the defined abilities using class@method notation.
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected $stringCallbacks = [];
+    protected array $stringCallbacks = [];
 
     /**
      * The callback to be used to guess policy names.
@@ -84,6 +86,13 @@ class Gate implements GateInterface
      * @var null|callable
      */
     protected $guessPolicyNamesUsingCallback;
+
+    /**
+     * The cache of the resolved policy class names.
+     *
+     * @var array<string, null|string>
+     */
+    protected array $policyCache = [];
 
     /**
      * Create a new gate instance.
@@ -115,8 +124,8 @@ class Gate implements GateInterface
     {
         $abilities = is_array($ability) ? $ability : func_get_args();
 
-        foreach ($abilities as $ability) {
-            if (! isset($this->abilities[$ability])) {
+        foreach ($abilities as $name) {
+            if (! isset($this->abilities[$name])) {
                 return false;
             }
         }
@@ -129,12 +138,12 @@ class Gate implements GateInterface
      *
      * @param callable|string $callback
      *
-     * @throws \InvalidArgumentException
-     * @return $this
+     * @throws InvalidArgumentException
+     * @return static
      */
-    public function define(string $ability, $callback)
+    public function define(string $ability, $callback): static
     {
-        if (is_array($callback) && isset($callback[0]) && is_string($callback[0])) {
+        if (is_array($callback) && isset($callback[0], $callback[1]) && is_string($callback[0]) && is_string($callback[1])) {
             $callback = $callback[0] . '@' . $callback[1];
         }
 
@@ -154,11 +163,11 @@ class Gate implements GateInterface
     /**
      * Define abilities for a resource.
      *
-     * @return $this
+     * @return static
      */
-    public function resource(string $name, string $class, array $abilities = null)
+    public function resource(string $name, string $class, ?array $abilities = null): static
     {
-        $abilities = $abilities ?: [
+        $abilities ??= [
             'viewAny' => 'viewAny',
             'view' => 'view',
             'create' => 'create',
@@ -176,11 +185,15 @@ class Gate implements GateInterface
     /**
      * Define a policy class for a given class type.
      *
-     * @return $this
+     * @return static
      */
-    public function policy(string $class, string $policy)
+    public function policy(string $class, string $policy): static
     {
         $this->policies[$class] = $policy;
+
+        // Any memoized policy name may now point to the wrong class, so the whole
+        // cache is dropped instead of trying to guess which entries are stale.
+        $this->policyCache = [];
 
         return $this;
     }
@@ -188,9 +201,9 @@ class Gate implements GateInterface
     /**
      * Register a callback to run before all Gate checks.
      *
-     * @return $this
+     * @return static
      */
-    public function before(callable $callback)
+    public function before(callable $callback): static
     {
         $this->beforeCallbacks[] = $callback;
 
@@ -200,9 +213,9 @@ class Gate implements GateInterface
     /**
      * Register a callback to run after all Gate checks.
      *
-     * @return $this
+     * @return static
      */
-    public function after(callable $callback)
+    public function after(callable $callback): static
     {
         $this->afterCallbacks[] = $callback;
 
@@ -237,9 +250,13 @@ class Gate implements GateInterface
      */
     public function check($abilities, $arguments = []): bool
     {
-        return collect($abilities)->every(function ($ability) use ($arguments) {
-            return $this->inspect($ability, $arguments)->allowed();
-        });
+        foreach ($this->wrapAbilities($abilities) as $ability) {
+            if ($this->inspect($ability, $arguments)->denied()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -250,9 +267,27 @@ class Gate implements GateInterface
      */
     public function any($abilities, $arguments = []): bool
     {
-        return collect($abilities)->contains(function ($ability) use ($arguments) {
-            return $this->check($ability, $arguments);
-        });
+        foreach ($this->wrapAbilities($abilities) as $ability) {
+            if ($this->inspect($ability, $arguments)->allowed()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Normalize the given abilities into an array.
+     *
+     * @param iterable|string $abilities
+     */
+    protected function wrapAbilities(iterable|string $abilities): array
+    {
+        if (is_string($abilities)) {
+            return [$abilities];
+        }
+
+        return $abilities instanceof Traversable ? iterator_to_array($abilities) : (array) $abilities;
     }
 
     /**
@@ -271,8 +306,8 @@ class Gate implements GateInterface
      *
      * @param array|mixed $arguments
      *
-     *@throws \Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException
-     * @return \Kooditorm\Hyperf\Auth\Access\Response
+     * @throws AuthorizationException
+     * @return Response
      */
     public function authorize(string $ability, $arguments = []): Response
     {
@@ -284,7 +319,7 @@ class Gate implements GateInterface
      *
      * @param array|mixed $arguments
      *
-     * @return \Kooditorm\Hyperf\Auth\Access\Response
+     * @return Response
      */
     public function inspect(string $ability, $arguments = []): Response
     {
@@ -306,10 +341,10 @@ class Gate implements GateInterface
      *
      * @param array|mixed $arguments
      *
-     *@throws \Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException
-     * @return null|bool|\Kooditorm\Hyperf\Auth\Access\Response
+     * @throws AuthorizationException
+     * @return null|bool|Response
      */
-    public function raw(string $ability, $arguments = [])
+    public function raw(string $ability, $arguments = []): mixed
     {
         $arguments = Arr::wrap($arguments);
 
@@ -344,33 +379,46 @@ class Gate implements GateInterface
      *
      * @param object|string $class
      *
-     * @return mixed|void
+     * @return mixed
      */
-    public function getPolicyFor($class)
+    public function getPolicyFor($class): mixed
     {
         if (is_object($class)) {
             $class = get_class($class);
         }
 
         if (! is_string($class)) {
-            return;
+            return null;
+        }
+
+        // The policy lookup may walk through every registered policy and may also
+        // hit the class loader, so the resolved class name is memoized here to
+        // keep the cost of the repeated checks as low as possible.
+        if (array_key_exists($class, $this->policyCache)) {
+            $policy = $this->policyCache[$class];
+
+            return is_null($policy) ? null : $this->resolvePolicy($policy);
         }
 
         if (isset($this->policies[$class])) {
-            return $this->resolvePolicy($this->policies[$class]);
+            return $this->resolvePolicy($this->policyCache[$class] = $this->policies[$class]);
         }
 
         foreach ($this->guessPolicyName($class) as $guessedPolicy) {
             if (class_exists($guessedPolicy)) {
-                return $this->resolvePolicy($guessedPolicy);
+                return $this->resolvePolicy($this->policyCache[$class] = $guessedPolicy);
             }
         }
 
         foreach ($this->policies as $expected => $policy) {
             if (is_subclass_of($class, $expected)) {
-                return $this->resolvePolicy($policy);
+                return $this->resolvePolicy($this->policyCache[$class] = $policy);
             }
         }
+
+        $this->policyCache[$class] = null;
+
+        return null;
     }
 
     /**
@@ -380,7 +428,7 @@ class Gate implements GateInterface
      *
      * @return mixed
      */
-    public function resolvePolicy($class)
+    public function resolvePolicy(object|string $class): mixed
     {
         return $this->container->make($class);
     }
@@ -390,9 +438,9 @@ class Gate implements GateInterface
      *
      * @return static
      */
-    public function forUser(AuthenticatableInterface $user)
+    public function forUser(AuthenticatableInterface $user): static
     {
-        $callback = function () use ($user) {
+        $callback = static function () use ($user) {
             return $user;
         };
 
@@ -422,21 +470,22 @@ class Gate implements GateInterface
     /**
      * Specify a callback to be used to guess policy names.
      *
-     * @return $this
+     * @return static
      */
-    public function guessPolicyNamesUsing(callable $callback)
+    public function guessPolicyNamesUsing(callable $callback): static
     {
         $this->guessPolicyNamesUsingCallback = $callback;
+
+        // The guessed names may change, so every memoized result is dropped.
+        $this->policyCache = [];
 
         return $this;
     }
 
     /**
      * Create the ability callback for a callback string.
-     *
-     * @return \Closure
      */
-    protected function buildAbilityCallback(string $ability, string $callback)
+    protected function buildAbilityCallback(string $ability, string $callback): Closure
     {
         return function () use ($ability, $callback) {
             if (Str::contains($callback, '@')) {
@@ -471,11 +520,11 @@ class Gate implements GateInterface
     /**
      * Determine whether the callback/method can be called with the given user.
      *
-     * @param array|\Closure|string $class
+     * @param array|object|string $class
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    protected function canBeCalledWithUser(?AuthenticatableInterface $user, $class, ?string $method = null): bool
+    protected function canBeCalledWithUser(?AuthenticatableInterface $user, array|object|string $class, ?string $method = null): bool
     {
         if (! is_null($user)) {
             return true;
@@ -497,31 +546,25 @@ class Gate implements GateInterface
     /**
      * Determine if the given class method allows guests.
      *
-     * @param callable|string $class
+     * @param object|string $class
      */
-    protected function methodAllowsGuests($class, string $method): bool
+    protected function methodAllowsGuests(object|string $class, string $method): bool
     {
         try {
-            $reflection = new ReflectionClass($class);
-
-            $method = $reflection->getMethod($method);
-        } catch (Exception $e) {
+            $parameters = (new ReflectionClass($class))
+                ->getMethod($method)
+                ->getParameters();
+        } catch (ReflectionException) {
             return false;
         }
 
-        if ($method) {
-            $parameters = $method->getParameters();
-
-            return isset($parameters[0]) && $this->parameterAllowsGuests($parameters[0]);
-        }
-
-        return false;
+        return isset($parameters[0]) && $this->parameterAllowsGuests($parameters[0]);
     }
 
     /**
      * Determine if the callback allows guests.
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function callbackAllowsGuests(callable $callback): bool
     {
@@ -533,9 +576,9 @@ class Gate implements GateInterface
     /**
      * Determine if the given parameter allows guests.
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    protected function parameterAllowsGuests(\ReflectionParameter $parameter): bool
+    protected function parameterAllowsGuests(ReflectionParameter $parameter): bool
     {
         return ($parameter->hasType() && $parameter->allowsNull()) ||
             ($parameter->isDefaultValueAvailable() && is_null($parameter->getDefaultValue()));
@@ -544,10 +587,10 @@ class Gate implements GateInterface
     /**
      * Resolve and call the appropriate authorization callback.
      *
-     * @throws \ReflectionException
-     * @return bool|\Kooditorm\Hyperf\Auth\Access\Response
+     * @throws ReflectionException
+     * @return null|bool|Response
      */
-    protected function callAuthCallback(?AuthenticatableInterface $user, string $ability, array $arguments)
+    protected function callAuthCallback(?AuthenticatableInterface $user, string $ability, array $arguments): mixed
     {
         $callback = $this->resolveAuthCallback($user, $ability, $arguments);
 
@@ -557,10 +600,10 @@ class Gate implements GateInterface
     /**
      * Call all of the before callbacks and return if a result is given.
      *
-     * @throws \ReflectionException
-     * @return null|bool|\Kooditorm\Hyperf\Auth\Access\Response
+     * @throws ReflectionException
+     * @return null|bool|Response
      */
-    protected function callBeforeCallbacks(?AuthenticatableInterface $user, string $ability, array $arguments)
+    protected function callBeforeCallbacks(?AuthenticatableInterface $user, string $ability, array $arguments): mixed
     {
         foreach ($this->beforeCallbacks as $before) {
             if (! $this->canBeCalledWithUser($user, $before)) {
@@ -571,18 +614,19 @@ class Gate implements GateInterface
                 return $result;
             }
         }
+
         return null;
     }
 
     /**
      * Call all of the after callbacks with check result.
      *
-     * @param null|bool|\Kooditorm\Hyperf\Auth\Access\Response $result
+     * @param null|bool|Response $result
      *
-     * @throws \ReflectionException
-     * @return null|bool|\Kooditorm\Hyperf\Auth\Access\Response
+     * @throws ReflectionException
+     * @return null|bool|Response
      */
-    protected function callAfterCallbacks(?AuthenticatableInterface $user, string $ability, array $arguments, $result)
+    protected function callAfterCallbacks(?AuthenticatableInterface $user, string $ability, array $arguments, mixed $result): mixed
     {
         foreach ($this->afterCallbacks as $after) {
             if (! $this->canBeCalledWithUser($user, $after)) {
@@ -602,10 +646,9 @@ class Gate implements GateInterface
     /**
      * Resolve the callable for the given ability and arguments.
      *
-     * @throws \ReflectionException
-     * @return callable
+     * @throws ReflectionException
      */
-    protected function resolveAuthCallback(?AuthenticatableInterface $user, string $ability, array $arguments)
+    protected function resolveAuthCallback(?AuthenticatableInterface $user, string $ability, array $arguments): callable
     {
         if (isset($arguments[0]) &&
             ! is_null($policy = $this->getPolicyFor($arguments[0])) &&
@@ -626,7 +669,7 @@ class Gate implements GateInterface
             return $this->abilities[$ability];
         }
 
-        return function () {
+        return static function () {
         };
     }
 
@@ -647,17 +690,17 @@ class Gate implements GateInterface
     /**
      * Resolve the callback for a policy check.
      *
-     * @param mixed $policy
-     *
-     * @return bool|callable
+     * @param object|string $policy
      */
-    protected function resolvePolicyCallback(?AuthenticatableInterface $user, string $ability, array $arguments, $policy)
+    protected function resolvePolicyCallback(?AuthenticatableInterface $user, string $ability, array $arguments, object|string $policy): Closure|false
     {
-        if (! is_callable([$policy, $this->formatAbilityToMethod($ability)])) {
+        $method = $this->formatAbilityToMethod($ability);
+
+        if (! is_callable([$policy, $method])) {
             return false;
         }
 
-        return function () use ($user, $ability, $arguments, $policy) {
+        return function () use ($user, $ability, $method, $arguments, $policy) {
             // This callback will be responsible for calling the policy's before method and
             // running this policy method if necessary. This is used to when objects are
             // mapped to policy objects in the user's configurations or on this class.
@@ -675,8 +718,6 @@ class Gate implements GateInterface
                 return $result;
             }
 
-            $method = $this->formatAbilityToMethod($ability);
-
             return $this->callPolicyMethod($policy, $method, $user, $arguments);
         };
     }
@@ -684,31 +725,33 @@ class Gate implements GateInterface
     /**
      * Call the "before" method on the given policy, if applicable.
      *
-     * @param mixed $policy
+     * @param object|string $policy
      *
-     * @throws \ReflectionException
-     * @return mixed|void
+     * @throws ReflectionException
+     * @return mixed
      */
-    protected function callPolicyBefore($policy, ?AuthenticatableInterface $user, string $ability, array $arguments)
+    protected function callPolicyBefore(object|string $policy, ?AuthenticatableInterface $user, string $ability, array $arguments): mixed
     {
         if (! method_exists($policy, 'before')) {
-            return;
+            return null;
         }
 
         if ($this->canBeCalledWithUser($user, $policy, 'before')) {
             return $policy->before($user, $ability, ...$arguments);
         }
+
+        return null;
     }
 
     /**
      * Call the appropriate method on the given policy.
      *
-     * @param mixed $policy
+     * @param object|string $policy
      *
-     * @throws \ReflectionException
-     * @return mixed|void
+     * @throws ReflectionException
+     * @return mixed
      */
-    protected function callPolicyMethod($policy, string $method, ?AuthenticatableInterface $user, array $arguments)
+    protected function callPolicyMethod(object|string $policy, string $method, ?AuthenticatableInterface $user, array $arguments): mixed
     {
         // If this first argument is a string, that means they are passing a class name
         // to the policy. We will remove the first argument from this argument array
@@ -718,12 +761,14 @@ class Gate implements GateInterface
         }
 
         if (! is_callable([$policy, $method])) {
-            return;
+            return null;
         }
 
         if ($this->canBeCalledWithUser($user, $policy, $method)) {
             return $policy->{$method}($user, ...$arguments);
         }
+
+        return null;
     }
 
     /**
@@ -731,7 +776,7 @@ class Gate implements GateInterface
      */
     protected function formatAbilityToMethod(string $ability): string
     {
-        return strpos($ability, '-') !== false ? Str::camel($ability) : $ability;
+        return str_contains($ability, '-') ? Str::camel($ability) : $ability;
     }
 
     /**
@@ -739,7 +784,7 @@ class Gate implements GateInterface
      *
      * @return mixed
      */
-    protected function resolveUser()
+    protected function resolveUser(): mixed
     {
         return call_user_func($this->userResolver);
     }

@@ -11,24 +11,25 @@ declare(strict_types=1);
  */
 
 namespace Kooditorm\Hyperf\Auth\Access;
+
 trait HandlesAuthorization
 {
     /**
      * Create a new access response.
      *
-     * @param null|mixed $code
+     * @param mixed $code
      */
-    protected function allow(?string $message = null, $code = null): Response
+    protected function allow(?string $message = null, mixed $code = null): Response
     {
         return Response::allow($message, $code);
     }
 
     /**
-     * Throws an unauthorized exception.
+     * Create a new denied access response.
      *
-     * @param null|mixed $code
+     * @param mixed $code
      */
-    protected function deny(?string $message = null, $code = null): Response
+    protected function deny(?string $message = null, mixed $code = null): Response
     {
         return Response::deny($message, $code);
     }

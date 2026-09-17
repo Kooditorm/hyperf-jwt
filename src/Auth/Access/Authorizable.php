@@ -14,6 +14,8 @@ namespace Kooditorm\Hyperf\Auth\Access;
 
 use Hyperf\Context\ApplicationContext;
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateManagerInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 trait Authorizable
 {
@@ -22,11 +24,12 @@ trait Authorizable
      *
      * @param iterable|string $abilities
      * @param array|mixed $arguments
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function can($abilities, $arguments = []): bool
+    public function can(iterable|string $abilities, mixed $arguments = []): bool
     {
-        return ApplicationContext::getContainer()
-            ->get(GateManagerInterface::class)
+        return $this->gateManager()
             ->forUser($this)
             ->check($abilities, $arguments);
     }
@@ -36,8 +39,10 @@ trait Authorizable
      *
      * @param iterable|string $abilities
      * @param array|mixed $arguments
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function cant($abilities, $arguments = []): bool
+    public function cant(iterable|string $abilities, mixed $arguments = []): bool
     {
         return ! $this->can($abilities, $arguments);
     }
@@ -47,9 +52,22 @@ trait Authorizable
      *
      * @param iterable|string $abilities
      * @param array|mixed $arguments
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function cannot($abilities, $arguments = []): bool
+    public function cannot(iterable|string $abilities, mixed $arguments = []): bool
     {
         return $this->cant($abilities, $arguments);
+    }
+
+    /**
+     * Resolve the gate manager from the container.
+     *
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    protected function gateManager(): GateManagerInterface
+    {
+        return ApplicationContext::getContainer()->get(GateManagerInterface::class);
     }
 }

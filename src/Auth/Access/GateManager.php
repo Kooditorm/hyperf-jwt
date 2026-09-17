@@ -15,6 +15,7 @@ namespace Kooditorm\Hyperf\Auth\Access;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Di\Annotation\AnnotationCollector;
 use Kooditorm\Hyperf\Auth\Annotations\Policy;
+use Kooditorm\Hyperf\Auth\Contracts\Access\GateInterface;
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 use Kooditorm\Hyperf\Auth\Events\GateManagerResolved;
@@ -23,46 +24,35 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use function Hyperf\Support\call;
 use function Hyperf\Support\make;
 
-
 class GateManager implements GateManagerInterface
 {
     /**
      * The container instance.
-     *
-     * @var \Psr\Container\ContainerInterface
      */
-    protected $container;
+    protected ContainerInterface $container;
 
     /**
      * The config instance.
-     *
-     * @var \Hyperf\Contract\ConfigInterface
      */
-    protected $config;
+    protected ConfigInterface $config;
 
     /**
-     * The assess gate instance.
-     *
-     * @var \Hyperf\Contract\ConfigInterface
+     * The access gate instance.
      */
-    protected $gate;
+    protected GateInterface $gate;
 
     /**
      * The event dispatcher instance.
-     *
-     * @var \Psr\EventDispatcher\EventDispatcherInterface
      */
-    protected $eventDispatcher;
+    protected EventDispatcherInterface $eventDispatcher;
 
     /**
-     * The event dispatcher instance.
-     *
-     * @var \Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface
+     * The auth manager instance.
      */
-    protected $auth;
+    protected AuthManagerInterface $auth;
 
     /**
-     * Create a new Auth manager instance.
+     * Create a new Gate manager instance.
      */
     public function __construct(ContainerInterface $container)
     {
@@ -70,22 +60,33 @@ class GateManager implements GateManagerInterface
         $this->config = $container->get(ConfigInterface::class);
         $this->eventDispatcher = $container->get(EventDispatcherInterface::class);
         $this->auth = $container->get(AuthManagerInterface::class);
-        $this->gate = make(Gate::class, ['userResolver' => function () {
-            return call($this->auth->userResolver());
-        }]);
+
+        $this->gate = make(Gate::class, [
+            'userResolver' => function () {
+                return call($this->auth->userResolver());
+            },
+        ]);
+
         $this->registerPoliciesByConfig();
         $this->registerPoliciesByAnnotation();
+
         $this->eventDispatcher->dispatch(new GateManagerResolved($this));
     }
 
     /**
      * Dynamically call the default driver instance.
-     *
-     * @return mixed
      */
-    public function __call(string $method, array $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         return $this->gate->{$method}(...$parameters);
+    }
+
+    /**
+     * Get the underlying gate instance.
+     */
+    public function getGate(): GateInterface
+    {
+        return $this->gate;
     }
 
     /**
@@ -93,9 +94,10 @@ class GateManager implements GateManagerInterface
      */
     protected function registerPoliciesByConfig(): void
     {
-        $policies = $this->config->get('auth.policies', []);
+        $policies = (array) $this->config->get('auth.policies', []);
+
         foreach ($policies as $model => $policy) {
-            $this->gate->policy($model, $policy);
+            $this->gate->policy((string) $model, (string) $policy);
         }
     }
 
@@ -104,10 +106,11 @@ class GateManager implements GateManagerInterface
      */
     protected function registerPoliciesByAnnotation(): void
     {
-        $policies = AnnotationCollector::getClassesByAnnotation(Policy::class);
+        $policies = (array) AnnotationCollector::getClassesByAnnotation(Policy::class);
+
         foreach ($policies as $policy => $annotation) {
-            foreach ($annotation->models as $model) {
-                $this->gate->policy($model, $policy);
+            foreach ((array) ($annotation->models ?? []) as $model) {
+                $this->gate->policy((string) $model, (string) $policy);
             }
         }
     }
