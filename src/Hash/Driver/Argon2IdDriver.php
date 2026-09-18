@@ -33,7 +33,7 @@ class Argon2IdDriver extends Argon2iDriver
     /**
      * Get the algorithm that should be used for hashing.
      */
-    protected function algorithm(): int
+    protected function algorithm(): string
     {
         return PASSWORD_ARGON2ID;
     }

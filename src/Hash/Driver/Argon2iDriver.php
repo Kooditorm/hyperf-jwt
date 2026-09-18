@@ -127,7 +127,7 @@ class Argon2iDriver extends AbstractDriver implements DriverInterface
     /**
      * Get the algorithm that should be used for hashing.
      */
-    protected function algorithm(): int
+    protected function algorithm(): string
     {
         return PASSWORD_ARGON2I;
     }
