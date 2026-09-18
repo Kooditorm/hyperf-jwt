@@ -17,9 +17,9 @@ use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 class AuthManagerResolved
 {
     /**
-     * @var AuthManagerInterface
+     * The authentication manager instance.
      */
-    public $auth;
+    public AuthManagerInterface $auth;
 
     /**
      * Create a new event instance.

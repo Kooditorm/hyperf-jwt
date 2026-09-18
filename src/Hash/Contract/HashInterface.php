@@ -16,8 +16,6 @@ interface HashInterface extends DriverInterface
 {
     /**
      * Get a driver instance.
-     *
-     * @return DriverInterface
      */
     public function getDriver(?string $name = null): DriverInterface;
 }

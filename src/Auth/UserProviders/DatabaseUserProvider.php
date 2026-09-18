@@ -19,31 +19,25 @@ use Hyperf\Stringable\Str;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 use Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface;
 use Kooditorm\Hyperf\Auth\GenericUser;
-use Kooditorm\Hyperf\Hash\Contract\DriverInterface as HasherInterface;
+use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
 
 class DatabaseUserProvider implements UserProviderInterface
 {
     /**
      * The active database connection.
-     *
-     * @var ConnectionInterface
      */
-    protected $conn;
+    protected ConnectionInterface $conn;
 
     /**
      * The hasher implementation.
-     *
-     * @var HashInterface
      */
-    protected $hasher;
+    protected DriverInterface $hasher;
 
     /**
      * The table containing the users.
-     *
-     * @var string
      */
-    protected $table;
+    protected string $table;
 
     /**
      * Create a new database user provider.
@@ -56,30 +50,20 @@ class DatabaseUserProvider implements UserProviderInterface
         $this->conn = ($connection = $options['connection'] ?? null) instanceof ConnectionInterface
             ? $connection
             : $connectionResolver->connection($connection);
-        $this->hasher = ($hasher = $options['hash_driver'] ?? null) instanceof HasherInterface
+        $this->hasher = ($hasher = $options['hash_driver'] ?? null) instanceof DriverInterface
             ? $hasher
             : $hash->getDriver($hasher);
         $this->table = $options['table'] ?? null;
     }
 
-    /**
-     * Retrieve a user by their unique identifier.
-     *
-     * @param mixed $identifier
-     */
-    public function retrieveById($identifier): ?AuthenticatableInterface
+    public function retrieveById(mixed $identifier): ?AuthenticatableInterface
     {
         $user = $this->conn->table($this->table)->find($identifier);
 
         return $this->getGenericUser($user);
     }
 
-    /**
-     * Retrieve a user by their unique identifier and "remember me" token.
-     *
-     * @param mixed $identifier
-     */
-    public function retrieveByToken($identifier, string $token): ?AuthenticatableInterface
+    public function retrieveByToken(mixed $identifier, string $token): ?AuthenticatableInterface
     {
         $user = $this->getGenericUser(
             $this->conn->table($this->table)->find($identifier)
@@ -89,9 +73,6 @@ class DatabaseUserProvider implements UserProviderInterface
             ? $user : null;
     }
 
-    /**
-     * Update the "remember me" token for the given user in storage.
-     */
     public function updateRememberToken(AuthenticatableInterface $user, string $token): void
     {
         $this->conn->table($this->table)
@@ -99,14 +80,12 @@ class DatabaseUserProvider implements UserProviderInterface
             ->update([$user->getRememberTokenName() => $token]);
     }
 
-    /**
-     * Retrieve a user by the given credentials.
-     */
     public function retrieveByCredentials(array $credentials): ?AuthenticatableInterface
     {
-        if (empty($credentials) ||
-            (count($credentials) === 1 &&
-                array_key_exists('password', $credentials))) {
+        if (
+            empty($credentials)
+            || (count($credentials) === 1 && array_key_exists('password', $credentials))
+        ) {
             return null;
         }
 
@@ -135,9 +114,6 @@ class DatabaseUserProvider implements UserProviderInterface
         return $this->getGenericUser($user);
     }
 
-    /**
-     * Validate a user against the given credentials.
-     */
     public function validateCredentials(AuthenticatableInterface $user, array $credentials): bool
     {
         return $this->hasher->check(
@@ -148,14 +124,13 @@ class DatabaseUserProvider implements UserProviderInterface
 
     /**
      * Get the generic user.
-     *
-     * @param mixed $user
      */
-    protected function getGenericUser($user): ?GenericUser
+    protected function getGenericUser(mixed $user): ?GenericUser
     {
         if (! is_null($user)) {
             return new GenericUser((array) $user);
         }
+
         return null;
     }
 }

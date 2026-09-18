@@ -23,22 +23,18 @@ trait GuardHelpers
 {
     /**
      * The currently authenticated user.
-     *
-     * @var \Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface
      */
-    protected $user;
+    protected ?AuthenticatableInterface $user = null;
 
     /**
      * The user provider implementation.
-     *
-     * @var \Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface
      */
-    protected $provider;
+    protected UserProviderInterface $provider;
 
     /**
      * Determine if current user is authenticated. If not, throw an exception.
      *
-     * @throws \Kooditorm\Hyperf\Auth\Exceptions\AuthenticationException
+     * @throws AuthenticationException
      */
     public function authenticate(): AuthenticatableInterface
     {
@@ -83,15 +79,14 @@ trait GuardHelpers
         if ($this->user()) {
             return $this->user()->getAuthIdentifier();
         }
+
         return null;
     }
 
     /**
      * Set the current user.
-     *
-     * @return $this
      */
-    public function setUser(AuthenticatableInterface $user)
+    public function setUser(AuthenticatableInterface $user): static
     {
         $this->user = $user;
 
@@ -108,10 +103,8 @@ trait GuardHelpers
 
     /**
      * Set the user provider used by the guard.
-     *
-     * @return $this
      */
-    public function setProvider(UserProviderInterface $provider)
+    public function setProvider(UserProviderInterface $provider): static
     {
         $this->provider = $provider;
 

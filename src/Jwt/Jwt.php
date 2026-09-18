@@ -19,40 +19,21 @@ use Kooditorm\Hyperf\Jwt\Contracts\ManagerInterface;
 use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\RequestParserInterface;
 use Kooditorm\Hyperf\Jwt\Exceptions\JwtException;
 use Psr\Http\Message\ServerRequestInterface;
+
 class Jwt
 {
     use CustomClaims;
 
     /**
-     * @var ManagerInterface
-     */
-    protected $manager;
-
-    /**
-     * @var RequestParserInterface
-     */
-    protected $requestParser;
-
-    /**
-     * @var ServerRequestInterface
-     */
-    protected $request;
-
-    /**
      * Lock the subject.
-     *
-     * @var bool
      */
-    protected $lockSubject = true;
+    protected bool $lockSubject = true;
 
     public function __construct(
-        ManagerInterface $manager,
-        RequestParserInterface $requestParser,
-        ServerRequestInterface $request
+        protected readonly ManagerInterface $manager,
+        protected readonly RequestParserInterface $requestParser,
+        protected ServerRequestInterface $request
     ) {
-        $this->manager = $manager;
-        $this->requestParser = $requestParser;
-        $this->request = $request;
     }
 
     /**
@@ -76,9 +57,7 @@ class Jwt
      */
     public function fromSubject(JwtSubjectInterface $subject): string
     {
-        $payload = $this->makePayload($subject);
-
-        return $this->manager->encode($payload)->get();
+        return $this->manager->encode($this->makePayload($subject))->get();
     }
 
     /**
@@ -114,9 +93,8 @@ class Jwt
      * Invalidate a token (add it to the blacklist).
      *
      * @throws JwtException
-     * @return $this
      */
-    public function invalidate(bool $forceForever = false)
+    public function invalidate(bool $forceForever = false): static
     {
         $this->requireToken();
 
@@ -138,10 +116,8 @@ class Jwt
 
     /**
      * Check that the token is valid.
-     *
-     * @return bool|\Kooditorm\Hyperf\Jwt\Payload
      */
-    public function check(bool $getPayload = false)
+    public function check(bool $getPayload = false): Payload|bool
     {
         try {
             $payload = $this->checkOrFail();
@@ -173,9 +149,8 @@ class Jwt
      * Parse the token from the request.
      *
      * @throws JwtException
-     * @return $this
      */
-    public function parseToken()
+    public function parseToken(): static
     {
         if (! $token = $this->getRequestParser()->parseToken($this->request)) {
             throw new JwtException('The token could not be parsed from the request');
@@ -186,6 +161,7 @@ class Jwt
 
     /**
      * Get the raw Payload instance.
+     *
      * @throws JwtException
      */
     public function getPayload(bool $ignoreExpired = false): Payload
@@ -199,6 +175,7 @@ class Jwt
      * Convenience method to get a claim value.
      *
      * @throws JwtException
+     *
      * @return mixed
      */
     public function getClaim(string $claim)
@@ -217,11 +194,9 @@ class Jwt
     /**
      * Check if the subject model matches the one saved in the token.
      *
-     * @param object|string $model
-     *
      * @throws JwtException
      */
-    public function checkSubjectModel($model): bool
+    public function checkSubjectModel(object|string $model): bool
     {
         if (($prv = $this->getPayload()->get('prv')) === null) {
             return true;
@@ -232,12 +207,8 @@ class Jwt
 
     /**
      * Set the token.
-     *
-     * @param \Kooditorm\Hyperf\Jwt\Token|string $token
-     *
-     * @return $this
      */
-    public function setToken($token)
+    public function setToken(Token|string $token): static
     {
         Context::set(Token::class, $token instanceof Token ? $token : new Token($token));
 
@@ -246,20 +217,15 @@ class Jwt
 
     /**
      * Unset the current token.
-     *
-     * @return $this
      */
-    public function unsetToken()
+    public function unsetToken(): static
     {
         Context::destroy(Token::class);
 
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    public function setRequest(ServerRequestInterface $request)
+    public function setRequest(ServerRequestInterface $request): static
     {
         $this->request = $request;
 
@@ -268,10 +234,8 @@ class Jwt
 
     /**
      * Set whether the subject should be "locked".
-     *
-     * @return $this
      */
-    public function setLockSubject(bool $lock)
+    public function setLockSubject(bool $lock): static
     {
         $this->lockSubject = $lock;
 
@@ -334,10 +298,8 @@ class Jwt
 
     /**
      * Hash the subject model and return it.
-     *
-     * @param object|string $model
      */
-    protected function hashSubjectModel($model): string
+    protected function hashSubjectModel(object|string $model): string
     {
         return sha1(is_object($model) ? get_class($model) : (string) $model);
     }
@@ -347,7 +309,7 @@ class Jwt
      *
      * @throws JwtException
      */
-    protected function requireToken()
+    protected function requireToken(): void
     {
         if (! $this->getToken()) {
             throw new JwtException('A token is required');

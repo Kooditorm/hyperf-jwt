@@ -19,10 +19,8 @@ class GenericUser implements UserContract, JwtSubjectInterface
 {
     /**
      * All of the user's attributes.
-     *
-     * @var array
      */
-    protected $attributes;
+    protected array $attributes;
 
     /**
      * Create a new generic User object.
@@ -34,20 +32,16 @@ class GenericUser implements UserContract, JwtSubjectInterface
 
     /**
      * Dynamically access the user's attributes.
-     *
-     * @return mixed
      */
-    public function __get(string $key)
+    public function __get(string $key): mixed
     {
         return $this->attributes[$key];
     }
 
     /**
      * Dynamically set an attribute on the user.
-     *
-     * @param mixed $value
      */
-    public function __set(string $key, $value)
+    public function __set(string $key, mixed $value): void
     {
         $this->attributes[$key] = $value;
     }
@@ -78,10 +72,8 @@ class GenericUser implements UserContract, JwtSubjectInterface
 
     /**
      * Get the unique identifier for the user.
-     *
-     * @return mixed
      */
-    public function getAuthIdentifier()
+    public function getAuthIdentifier(): mixed
     {
         return $this->attributes[$this->getAuthIdentifierName()];
     }
@@ -105,7 +97,7 @@ class GenericUser implements UserContract, JwtSubjectInterface
     /**
      * Set the "remember me" token value.
      */
-    public function setRememberToken(string $value)
+    public function setRememberToken(string $value): void
     {
         $this->attributes[$this->getRememberTokenName()] = $value;
     }
@@ -120,10 +112,8 @@ class GenericUser implements UserContract, JwtSubjectInterface
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
      */
-    public function getJwtIdentifier()
+    public function getJwtIdentifier(): mixed
     {
         return $this->getAuthIdentifier();
     }

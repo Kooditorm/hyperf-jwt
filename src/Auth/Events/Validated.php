@@ -18,24 +18,20 @@ class Validated
 {
     /**
      * The authentication guard name.
-     *
-     * @var string
      */
-    public $guard;
+    public string $guard;
 
     /**
-     * The user retrieved and validated from the User Provider.
-     *
-     * @var AuthenticatableInterface
+     * The user retrieved and validated from the user provider.
      */
-    public $user;
+    public AuthenticatableInterface $user;
 
     /**
      * Create a new event instance.
      */
     public function __construct(string $guard, AuthenticatableInterface $user)
     {
-        $this->user = $user;
         $this->guard = $guard;
+        $this->user = $user;
     }
 }

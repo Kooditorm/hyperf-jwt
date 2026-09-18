@@ -248,5 +248,3 @@ return [
 
     'blacklist_storage' => Kooditorm\Hyperf\Jwt\Storage\HyperfCache::class,
 ];
-
-

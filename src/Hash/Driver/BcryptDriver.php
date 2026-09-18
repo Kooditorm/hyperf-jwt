@@ -19,17 +19,13 @@ class BcryptDriver extends AbstractDriver implements DriverInterface
 {
     /**
      * The default cost factor.
-     *
-     * @var int
      */
-    protected $rounds = 10;
+    protected int $rounds = 10;
 
     /**
      * Indicates whether to perform an algorithm check.
-     *
-     * @var bool
      */
-    protected $verifyAlgorithm = false;
+    protected bool $verifyAlgorithm = false;
 
     /**
      * Create a new driver instance.
@@ -43,7 +39,7 @@ class BcryptDriver extends AbstractDriver implements DriverInterface
     /**
      * Hash the given value.
      *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function make(string $value, array $options = []): string
     {
@@ -61,7 +57,7 @@ class BcryptDriver extends AbstractDriver implements DriverInterface
     /**
      * Check the given plain value against a hash.
      *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function check(string $value, string $hashedValue, array $options = []): bool
     {
@@ -84,8 +80,6 @@ class BcryptDriver extends AbstractDriver implements DriverInterface
 
     /**
      * Set the default password work factor.
-     *
-     * @return $this
      */
     public function setRounds(int $rounds): self
     {

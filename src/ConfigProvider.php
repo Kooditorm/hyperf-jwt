@@ -32,10 +32,8 @@ use Kooditorm\Hyperf\Jwt\RequestParser\RequestParserFactory;
 use Kooditorm\Hyperf\Jwt\Validators\PayloadValidator;
 use Kooditorm\Hyperf\Jwt\Validators\TokenValidator;
 
-
 class ConfigProvider
 {
-
     public function __invoke(): array
     {
         return [
@@ -48,10 +46,10 @@ class ConfigProvider
                 TokenValidatorInterface::class => TokenValidator::class,
                 PayloadValidatorInterface::class => PayloadValidator::class,
                 RequestParserInterface::class => RequestParserFactory::class,
-                JwtFactoryInterface::class => JwtFactory::class
+                JwtFactoryInterface::class => JwtFactory::class,
             ],
             'commands' => [
-                GenJwtSecretCommand::class
+                GenJwtSecretCommand::class,
             ],
             'annotations' => [
                 'scan' => [
@@ -59,9 +57,9 @@ class ConfigProvider
                         __DIR__,
                     ],
                     'ignore_annotations' => [
-                        'mixin'
-                    ]
-                ]
+                        'mixin',
+                    ],
+                ],
             ],
             'publish' => [
                 [
@@ -81,8 +79,8 @@ class ConfigProvider
                     'description' => 'The config for Kooditorm/Hyperf-jwt/jwt package.',
                     'source' => __DIR__ . '/../publish/jwt.php',
                     'destination' => BASE_PATH . '/config/autoload/jwt.php',
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

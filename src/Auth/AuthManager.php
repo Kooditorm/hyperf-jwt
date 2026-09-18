@@ -17,7 +17,6 @@ use Hyperf\Contract\ConfigInterface;
 use InvalidArgumentException;
 use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\GuardInterface;
-use Kooditorm\Hyperf\Auth\Contracts\StatefulGuardInterface;
 use Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface;
 use Kooditorm\Hyperf\Auth\Events\AuthManagerResolved;
 use Psr\Container\ContainerInterface;
@@ -28,33 +27,15 @@ class AuthManager implements AuthManagerInterface
 {
     use ContextHelpers;
 
-    /**
-     * The application instance.
-     *
-     * @var ContainerInterface
-     */
-    protected $container;
+    protected ConfigInterface $config;
 
-    /**
-     * The config instance.
-     *
-     * @var ConfigInterface
-     */
-    protected $config;
-
-    /**
-     * The event dispatcher instance.
-     *
-     * @var EventDispatcherInterface
-     */
-    protected $eventDispatcher;
+    protected EventDispatcherInterface $eventDispatcher;
 
     /**
      * Create a new Auth manager instance.
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(protected readonly ContainerInterface $container)
     {
-        $this->container = $container;
         $this->config = $container->get(ConfigInterface::class);
         $this->eventDispatcher = $container->get(EventDispatcherInterface::class);
 
@@ -64,13 +45,12 @@ class AuthManager implements AuthManagerInterface
 
     /**
      * Attempt to get the guard from the local cache.
-     *
-     * @return GuardInterface|StatefulGuardInterface
      */
     public function guard(?string $name = null): GuardInterface
     {
         $name = $name ?: $this->getDefaultDriver();
         $id = 'guards.' . $name;
+
         return $this->getContext($id) ?: $this->setContext($id, $this->resolve($name));
     }
 
@@ -97,27 +77,23 @@ class AuthManager implements AuthManagerInterface
     /**
      * Set the default authentication driver name.
      */
-    public function setDefaultDriver(string $name)
+    public function setDefaultDriver(string $name): void
     {
         $this->config->set('auth.default.guard', $name);
     }
 
     /**
      * Get the user resolver callback.
-     *
-     * @return \Closure
      */
-    public function userResolver()
+    public function userResolver(): Closure
     {
         return $this->getContext('userResolver');
     }
 
     /**
      * Set the callback to be used to resolve users.
-     *
-     * @return $this
      */
-    public function resolveUsersUsing(Closure $userResolver)
+    public function resolveUsersUsing(Closure $userResolver): static
     {
         $this->setContext('userResolver', $userResolver);
 
@@ -127,7 +103,7 @@ class AuthManager implements AuthManagerInterface
     /**
      * Create the user provider implementation for the driver.
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function createUserProvider(?string $provider = null): ?UserProviderInterface
     {
@@ -154,16 +130,11 @@ class AuthManager implements AuthManagerInterface
     /**
      * Resolve the given guard.
      *
-     *@throws \InvalidArgumentException
-     * @return GuardInterface|StatefulGuardInterface
+     * @throws InvalidArgumentException
      */
-    protected function resolve(string $name)
+    protected function resolve(string $name): GuardInterface
     {
         $config = $this->getConfig($name);
-
-        if (empty($config)) {
-            throw new InvalidArgumentException("Auth guard [{$name}] is not defined.");
-        }
 
         if (empty($config['driver'])) {
             throw new InvalidArgumentException("Auth guard [{$name}] is not defined.");
@@ -175,18 +146,20 @@ class AuthManager implements AuthManagerInterface
         return make($config['driver'], compact('provider', 'name', 'options'));
     }
 
-    protected function getUserResolverClosure()
+    protected function getUserResolverClosure(): Closure
     {
-        return function ($guard = null) {
+        return function (?string $guard = null) {
             if (! empty($guard)) {
                 return $this->guard($guard)->user();
             }
+
             $guards = array_keys($this->config->get('auth.guards'));
             foreach ($guards as $guard) {
                 if (! empty($user = $this->guard($guard)->user())) {
                     return $user;
                 }
             }
+
             return null;
         };
     }

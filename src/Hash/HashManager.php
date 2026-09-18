@@ -16,28 +16,19 @@ use Hyperf\Contract\ConfigInterface;
 use InvalidArgumentException;
 use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
-use Kooditorm\Hyperf\Hash\Driver\BcryptDriver;
 use function Hyperf\Support\make;
 
 class HashManager implements HashInterface
 {
     /**
-     * The config instance.
-     *
-     * @var ConfigInterface
-     */
-    protected $config;
-
-    /**
      * The array of created "drivers".
      *
-     * @var DriverInterface
+     * @var array<string, DriverInterface>
      */
-    protected $drivers = [];
+    protected array $drivers = [];
 
-    public function __construct(ConfigInterface $config)
+    public function __construct(protected readonly ConfigInterface $config)
     {
-        $this->config = $config;
     }
 
     /**
@@ -79,20 +70,18 @@ class HashManager implements HashInterface
      */
     public function getDriver(?string $name = null): DriverInterface
     {
-        if (isset($this->drivers[$name]) && $this->drivers[$name] instanceof DriverInterface) {
+        $name = $name ?: $this->config->get('hash.default', 'bcrypt');
+
+        if (isset($this->drivers[$name])) {
             return $this->drivers[$name];
         }
 
-        $name = $name ?: $this->config->get('hash.default', 'bcrypt');
-
         $config = $this->config->get("hash.driver.{$name}");
-        if (empty($config) or empty($config['class'])) {
+        if (empty($config['class'])) {
             throw new InvalidArgumentException(sprintf('The hash driver config %s is invalid.', $name));
         }
 
-        $driverClass = $config['class'] ?? BcryptDriver::class;
-
-        $driver = make($driverClass, ['options' => $config['options'] ?? []]);
+        $driver = make($config['class'], ['options' => $config['options'] ?? []]);
 
         return $this->drivers[$name] = $driver;
     }

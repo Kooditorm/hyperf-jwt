@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt;
 
+use DateTimeImmutable;
 use Exception;
 use Hyperf\Collection\Arr;
 use Hyperf\Collection\Collection;
@@ -34,14 +35,15 @@ use Lcobucci\JWT\Signer\Rsa\Sha384 as RS384;
 use Lcobucci\JWT\Signer\Rsa\Sha512 as RS512;
 use Lcobucci\JWT\Token\RegisteredClaims;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
+
 class Codec implements CodecInterface
 {
     /**
      * Signers that this provider supports.
      *
-     * @var array
+     * @var array<string, class-string<Signer>>
      */
-    protected $signers = [
+    protected array $signers = [
         'HS256' => HS256::class,
         'HS384' => HS384::class,
         'HS512' => HS512::class,
@@ -53,7 +55,12 @@ class Codec implements CodecInterface
         'ES512' => ES512::class,
     ];
 
-    protected $asymmetric = [
+    /**
+     * Whether the given algorithm is asymmetric.
+     *
+     * @var array<string, bool>
+     */
+    protected array $asymmetric = [
         'HS256' => false,
         'HS384' => false,
         'HS512' => false,
@@ -67,60 +74,47 @@ class Codec implements CodecInterface
 
     /**
      * The secret.
-     *
-     * @var string
      */
-    protected $secret;
+    protected string $secret;
 
     /**
      * The array of keys.
-     *
-     * @var array
      */
-    protected $keys;
+    protected array $keys;
 
     /**
      * The used algorithm.
-     *
-     * @var string
      */
-    protected $algo;
+    protected string $algo;
 
     /**
      * The Configuration instance.
-     *
-     * @var Configuration
      */
-    protected $config;
+    protected Configuration $config;
 
     /**
      * The Signer instance.
-     *
-     * @var Signer
      */
-    protected $signer;
+    protected ?Signer $signer = null;
 
     /**
-     * @param null|Configuration $config
-     *
      * @throws JwtException
      */
-    public function __construct(string $secret, string $algo, array $keys, $config = null)
+    public function __construct(string $secret, string $algo, array $keys, ?Configuration $config = null)
     {
         $this->secret = $secret;
         $this->algo = $algo;
         $this->keys = $keys;
-        $this->config = $config;
-
         $this->signer = $this->getSigner();
 
-        if (! is_null($config)) {
+        if ($config !== null) {
             $this->config = $config;
         } elseif ($this->isAsymmetric()) {
             $this->config = Configuration::forAsymmetricSigner($this->signer, $this->getSigningKey(), $this->getVerificationKey());
         } else {
             $this->config = Configuration::forSymmetricSigner($this->signer, InMemory::plainText($this->getSecret()));
         }
+
         if (! count($this->config->validationConstraints())) {
             $this->config->setValidationConstraints(
                 new SignedWith($this->signer, $this->getVerificationKey()),
@@ -130,10 +124,8 @@ class Codec implements CodecInterface
 
     /**
      * Set the algorithm used to sign the token.
-     *
-     * @return $this
      */
-    public function setAlgo(string $algo)
+    public function setAlgo(string $algo): static
     {
         $this->algo = $algo;
 
@@ -150,10 +142,8 @@ class Codec implements CodecInterface
 
     /**
      * Set the secret used to sign the token.
-     *
-     * @return $this
      */
-    public function setSecret(string $secret)
+    public function setSecret(string $secret): static
     {
         $this->secret = $secret;
 
@@ -162,20 +152,16 @@ class Codec implements CodecInterface
 
     /**
      * Get the secret used to sign the token.
-     *
-     * @return string
      */
-    public function getSecret()
+    public function getSecret(): string
     {
         return $this->secret;
     }
 
     /**
      * Set the keys used to sign the token.
-     *
-     * @return $this
      */
-    public function setKeys(array $keys)
+    public function setKeys(array $keys): static
     {
         $this->keys = $keys;
 
@@ -235,6 +221,7 @@ class Codec implements CodecInterface
             foreach ($payload as $key => $value) {
                 $this->addClaim($builder, $key, $value);
             }
+
             return $builder->getToken($this->config->signer(), $this->config->signingKey())->toString();
         } catch (Exception $e) {
             throw new JwtException('Could not create token: ' . $e->getMessage(), $e->getCode(), $e);
@@ -259,10 +246,12 @@ class Codec implements CodecInterface
         if (! $this->config->validator()->validate($jwt, ...$this->config->validationConstraints())) {
             throw new TokenInvalidException('Token Signature could not be verified.');
         }
+
         return (new Collection($jwt->claims()->all()))->map(function ($claim) {
-            if (is_a($claim, \DateTimeImmutable::class)) {
+            if ($claim instanceof DateTimeImmutable) {
                 return $claim->getTimestamp();
             }
+
             if (is_object($claim) && method_exists($claim, 'getValue')) {
                 return $claim->getValue();
             }
@@ -273,46 +262,27 @@ class Codec implements CodecInterface
 
     /**
      * Gets the {@see $config} attribute.
-     *
-     * @return Configuration
      */
-    public function getConfig()
+    public function getConfig(): Configuration
     {
         return $this->config;
     }
 
     /**
      * Adds a claim to the {@see $config}.
-     *
-     * @param mixed $value
      */
-    protected function addClaim(Builder $builder, string $key, $value)
+    protected function addClaim(Builder $builder, string $key, mixed $value): void
     {
-        switch ($key) {
-            case RegisteredClaims::ID:
-                $builder->identifiedBy((string) $value);
-                break;
-            case RegisteredClaims::EXPIRATION_TIME:
-                $builder->expiresAt(\DateTimeImmutable::createFromFormat('U', (string) $value));
-                break;
-            case RegisteredClaims::NOT_BEFORE:
-                $builder->canOnlyBeUsedAfter(\DateTimeImmutable::createFromFormat('U', (string) $value));
-                break;
-            case RegisteredClaims::ISSUED_AT:
-                $builder->issuedAt(\DateTimeImmutable::createFromFormat('U', (string) $value));
-                break;
-            case RegisteredClaims::ISSUER:
-                $builder->issuedBy((string) $value);
-                break;
-            case RegisteredClaims::AUDIENCE:
-                $builder->permittedFor((string) $value);
-                break;
-            case RegisteredClaims::SUBJECT:
-                $builder->relatedTo((string) $value);
-                break;
-            default:
-                $builder->withClaim($key, $value);
-        }
+        match ($key) {
+            RegisteredClaims::ID => $builder->identifiedBy((string) $value),
+            RegisteredClaims::EXPIRATION_TIME => $builder->expiresAt(DateTimeImmutable::createFromFormat('U', (string) $value)),
+            RegisteredClaims::NOT_BEFORE => $builder->canOnlyBeUsedAfter(DateTimeImmutable::createFromFormat('U', (string) $value)),
+            RegisteredClaims::ISSUED_AT => $builder->issuedAt(DateTimeImmutable::createFromFormat('U', (string) $value)),
+            RegisteredClaims::ISSUER => $builder->issuedBy((string) $value),
+            RegisteredClaims::AUDIENCE => $builder->permittedFor((string) $value),
+            RegisteredClaims::SUBJECT => $builder->relatedTo((string) $value),
+            default => $builder->withClaim($key, $value),
+        };
     }
 
     /**

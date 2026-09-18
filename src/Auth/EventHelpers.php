@@ -39,7 +39,7 @@ trait EventHelpers
     /**
      * Fires the validated event if the dispatcher is set.
      */
-    protected function dispatchValidatedEvent(AuthenticatableInterface $user)
+    protected function dispatchValidatedEvent(AuthenticatableInterface $user): void
     {
         $this->eventDispatcher->dispatch(new Validated(
             $this->name,

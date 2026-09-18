@@ -16,17 +16,17 @@ use Hyperf\Contract\ConfigInterface;
 use Kooditorm\Hyperf\Jwt\Claims\Collection;
 use Kooditorm\Hyperf\Jwt\Contracts\PayloadValidatorInterface;
 use Kooditorm\Hyperf\Jwt\Exceptions\JwtException;
-use Kooditorm\Hyperf\Jwt\Exceptions\TokenInvalidException;
 use Kooditorm\Hyperf\Jwt\Exceptions\TokenExpiredException;
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenInvalidException;
 
 class PayloadValidator implements PayloadValidatorInterface
 {
     /**
      * The required claims.
      *
-     * @var array
+     * @var list<string>
      */
-    protected $requiredClaims = [];
+    protected array $requiredClaims = [];
 
     public function __construct(ConfigInterface $config)
     {
@@ -53,10 +53,8 @@ class PayloadValidator implements PayloadValidatorInterface
 
     /**
      * Set the required claims.
-     *
-     * @return $this
      */
-    public function setRequiredClaims(array $claims)
+    public function setRequiredClaims(array $claims): static
     {
         $this->requiredClaims = $claims;
 
@@ -69,11 +67,12 @@ class PayloadValidator implements PayloadValidatorInterface
      *
      * @throws TokenInvalidException
      */
-    protected function validateStructure(Collection $claims)
+    protected function validateStructure(Collection $claims): static
     {
-        if ($this->requiredClaims and ! $claims->hasAllClaims($this->requiredClaims)) {
+        if ($this->requiredClaims && ! $claims->hasAllClaims($this->requiredClaims)) {
             throw new TokenInvalidException('JWT payload does not contain the required claims');
         }
+
         return $this;
     }
 

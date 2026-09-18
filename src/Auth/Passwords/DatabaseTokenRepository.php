@@ -16,7 +16,6 @@ use Carbon\Carbon;
 use Hyperf\Database\ConnectionInterface;
 use Hyperf\Database\ConnectionResolverInterface;
 use Hyperf\Database\Query\Builder;
-use Hyperf\DbConnection\Connection;
 use Kooditorm\Hyperf\Auth\Contracts\CanResetPasswordInterface;
 use Kooditorm\Hyperf\Auth\Contracts\TokenRepositoryInterface;
 use Kooditorm\Hyperf\Hash\Contract\DriverInterface as HasherInterface;
@@ -26,38 +25,28 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
 {
     /**
      * The database connection instance.
-     *
-     * @var Connection
      */
-    protected $connection;
+    protected ConnectionInterface $connection;
 
     /**
-     * The Hasher implementation.
-     *
-     * @var HasherInterface
+     * The hasher implementation.
      */
-    protected $hasher;
+    protected HasherInterface $hasher;
 
     /**
      * The token database table.
-     *
-     * @var string
      */
-    protected $table;
+    protected string $table;
 
     /**
      * The number of seconds a token should last.
-     *
-     * @var int
      */
-    protected $expires;
+    protected int $expires;
 
     /**
      * Minimum number of seconds before re-redefining the token.
-     *
-     * @var int
      */
-    protected $throttle;
+    protected int $throttle;
 
     /**
      * Create a new token repository instance.
@@ -154,7 +143,7 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
     /**
      * Get the database connection instance.
      */
-    public function getConnection(): Connection
+    public function getConnection(): ConnectionInterface
     {
         return $this->connection;
     }
@@ -180,13 +169,17 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
      */
     protected function getPayload(string $email, string $token): array
     {
-        return ['email' => $email, 'token' => $this->hasher->make($token), 'created_at' => new Carbon()];
+        return [
+            'email' => $email,
+            'token' => $this->hasher->make($token),
+            'created_at' => Carbon::now(),
+        ];
     }
 
     /**
      * Determine if the token has expired.
      */
-    protected function tokenExpired(string $createdAt): bool
+    protected function tokenExpired(mixed $createdAt): bool
     {
         return Carbon::parse($createdAt)->addSeconds($this->expires)->isPast();
     }
@@ -194,15 +187,13 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
     /**
      * Determine if the token was recently created.
      */
-    protected function tokenRecentlyCreated(string $createdAt): bool
+    protected function tokenRecentlyCreated(mixed $createdAt): bool
     {
         if ($this->throttle <= 0) {
             return false;
         }
 
-        return Carbon::parse($createdAt)->addSeconds(
-            $this->throttle
-        )->isFuture();
+        return Carbon::parse($createdAt)->addSeconds($this->throttle)->isFuture();
     }
 
     /**

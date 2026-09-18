@@ -18,39 +18,25 @@ use function Hyperf\Support\value;
 class Blacklist
 {
     /**
-     * The storage.
-     *
-     * @var StorageInterface
-     */
-    protected $storage;
-
-    /**
      * The grace period when a token is blacklisted. In seconds.
-     *
-     * @var int
      */
-    protected $gracePeriod;
+    protected int $gracePeriod;
 
     /**
      * Number of seconds from issue date in which a JWT can be refreshed.
-     *
-     * @var null|int
      */
-    protected $refreshTtl;
+    protected ?int $refreshTtl;
 
     /**
      * The unique key held within the blacklist.
-     *
-     * @var string
      */
-    protected $key = 'jti';
+    protected string $key = 'jti';
 
-    /**
-     * Constructor.
-     */
-    public function __construct(StorageInterface $storage, int $gracePeriod, ?int $refreshTtl)
-    {
-        $this->storage = $storage;
+    public function __construct(
+        protected readonly StorageInterface $storage,
+        int $gracePeriod,
+        ?int $refreshTtl
+    ) {
         $this->gracePeriod = $gracePeriod;
         $this->refreshTtl = $refreshTtl;
     }
@@ -62,12 +48,12 @@ class Blacklist
     {
         // if there is no exp claim then add the jwt to
         // the blacklist indefinitely
-        if (!$payload->hasKey('exp')) {
+        if (! $payload->hasKey('exp')) {
             return $this->addForever($payload);
         }
 
         // if we have already added this token to the blacklist
-        if (!empty($this->storage->get($this->getKey($payload)))) {
+        if (! empty($this->storage->get($this->getKey($payload)))) {
             return true;
         }
 
@@ -95,7 +81,7 @@ class Blacklist
      */
     public function has(Payload $payload): bool
     {
-        $val = $this->storage->get((string)$this->getKey($payload));
+        $val = $this->storage->get((string) $this->getKey($payload));
 
         // exit early if the token was blacklisted forever,
         if ($val === 'forever') {
@@ -103,7 +89,7 @@ class Blacklist
         }
 
         // check whether the expiry + grace has past
-        return !empty($val) and !Utils::isFuture($val['valid_until']);
+        return ! empty($val) && ! Utils::isFuture($val['valid_until']);
     }
 
     /**
@@ -126,12 +112,10 @@ class Blacklist
 
     /**
      * Set the grace period.
-     *
-     * @return $this
      */
-    public function setGracePeriod(int $gracePeriod)
+    public function setGracePeriod(int $gracePeriod): static
     {
-        $this->gracePeriod = (int)$gracePeriod;
+        $this->gracePeriod = $gracePeriod;
 
         return $this;
     }
@@ -156,10 +140,8 @@ class Blacklist
 
     /**
      * Set the unique key held within the blacklist.
-     *
-     * @return $this
      */
-    public function setKey(string $key)
+    public function setKey(string $key): static
     {
         $this->key = value($key);
 
@@ -168,12 +150,10 @@ class Blacklist
 
     /**
      * Set the refresh time limit.
-     *
-     * @return $this
      */
-    public function setRefreshTtl(?int $refreshTtl)
+    public function setRefreshTtl(?int $refreshTtl): static
     {
-        $this->refreshTtl = $refreshTtl === null ? null : (int)$refreshTtl;
+        $this->refreshTtl = $refreshTtl === null ? null : (int) $refreshTtl;
 
         return $this;
     }
@@ -197,7 +177,7 @@ class Blacklist
         // get the latter of the two expiration dates and find
         // the number of seconds until the expiration date,
         // plus 1 minute to avoid overlap
-        return $exp->max($iat->addSeconds($this->refreshTtl))->addMinute()->diffInRealSeconds();
+        return (int) $exp->max($iat->addSeconds((int) $this->refreshTtl))->addMinute()->diffInRealSeconds();
     }
 
     /**

@@ -18,21 +18,14 @@ use Hyperf\Di\Annotation\AbstractAnnotation;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS)]
 class Auth extends AbstractAnnotation
 {
-    /**
-     * @var array
-     */
     public array $guards;
 
-    /**
-     * @var bool
-     */
     public bool $passable;
 
     public function __construct(array|string|null $guards = null, bool $passable = false)
     {
-        $guards = is_null($guards) ? [] : $guards;
+        $guards ??= [];
         $this->guards = is_array($guards) ? array_unique($guards) : [$guards];
         $this->passable = $passable;
-
     }
 }

@@ -16,13 +16,14 @@ use Hyperf\Context\Context;
 
 trait ContextHelpers
 {
-    public function setContext(string $id, $value)
+    public function setContext(string $id, mixed $value): mixed
     {
         Context::set(static::class . '.' . $id, $value);
+
         return $value;
     }
 
-    public function getContext(string $id, $default = null, $coroutineId = null)
+    public function getContext(string $id, mixed $default = null, ?int $coroutineId = null): mixed
     {
         return Context::get(static::class . '.' . $id, $default, $coroutineId);
     }

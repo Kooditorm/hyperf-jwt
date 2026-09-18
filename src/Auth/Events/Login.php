@@ -18,24 +18,18 @@ class Login
 {
     /**
      * The authentication guard name.
-     *
-     * @var string
      */
-    public $guard;
+    public string $guard;
 
     /**
      * The authenticated user.
-     *
-     * @var AuthenticatableInterface
      */
-    public $user;
+    public AuthenticatableInterface $user;
 
     /**
      * Indicates if the user should be "remembered".
-     *
-     * @var bool
      */
-    public $remember;
+    public bool $remember;
 
     /**
      * Create a new event instance.

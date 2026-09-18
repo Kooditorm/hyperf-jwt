@@ -22,16 +22,13 @@ use function Hyperf\Support\make;
 
 class ManagerFactory
 {
-    /**
-     * @var array
-     */
-    private $config;
+    private array $config;
 
-    public function __invoke(ContainerInterface $container)
+    public function __invoke(ContainerInterface $container): Manager
     {
         $config = $container->get(ConfigInterface::class)->get('jwt');
         if (empty($config)) {
-            throw new InvalidConfigException(sprintf('JWT config is not defined.'));
+            throw new InvalidConfigException('JWT config is not defined.');
         }
 
         $this->config = $config;
@@ -51,9 +48,11 @@ class ManagerFactory
         $secret = base64_decode($this->config['secret'] ?? '');
         $algo = $this->config['algo'] ?? 'HS256';
         $keys = $this->config['keys'] ?? [];
+
         if (! empty($keys)) {
             $keys['passphrase'] = empty($keys['passphrase']) ? null : base64_decode($keys['passphrase']);
         }
+
         return make(Codec::class, compact('secret', 'algo', 'keys'));
     }
 

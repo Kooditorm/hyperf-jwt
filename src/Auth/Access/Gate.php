@@ -139,7 +139,6 @@ class Gate implements GateInterface
      * @param callable|string $callback
      *
      * @throws InvalidArgumentException
-     * @return static
      */
     public function define(string $ability, $callback): static
     {
@@ -162,8 +161,6 @@ class Gate implements GateInterface
 
     /**
      * Define abilities for a resource.
-     *
-     * @return static
      */
     public function resource(string $name, string $class, ?array $abilities = null): static
     {
@@ -184,8 +181,6 @@ class Gate implements GateInterface
 
     /**
      * Define a policy class for a given class type.
-     *
-     * @return static
      */
     public function policy(string $class, string $policy): static
     {
@@ -200,8 +195,6 @@ class Gate implements GateInterface
 
     /**
      * Register a callback to run before all Gate checks.
-     *
-     * @return static
      */
     public function before(callable $callback): static
     {
@@ -212,8 +205,6 @@ class Gate implements GateInterface
 
     /**
      * Register a callback to run after all Gate checks.
-     *
-     * @return static
      */
     public function after(callable $callback): static
     {
@@ -378,8 +369,6 @@ class Gate implements GateInterface
      * Get a policy instance for a given class.
      *
      * @param object|string $class
-     *
-     * @return mixed
      */
     public function getPolicyFor($class): mixed
     {
@@ -425,8 +414,6 @@ class Gate implements GateInterface
      * Build a policy class instance of the given type.
      *
      * @param object|string $class
-     *
-     * @return mixed
      */
     public function resolvePolicy(object|string $class): mixed
     {
@@ -435,8 +422,6 @@ class Gate implements GateInterface
 
     /**
      * Get a gate instance for the given user.
-     *
-     * @return static
      */
     public function forUser(AuthenticatableInterface $user): static
     {
@@ -469,8 +454,6 @@ class Gate implements GateInterface
 
     /**
      * Specify a callback to be used to guess policy names.
-     *
-     * @return static
      */
     public function guessPolicyNamesUsing(callable $callback): static
     {
@@ -728,7 +711,6 @@ class Gate implements GateInterface
      * @param object|string $policy
      *
      * @throws ReflectionException
-     * @return mixed
      */
     protected function callPolicyBefore(object|string $policy, ?AuthenticatableInterface $user, string $ability, array $arguments): mixed
     {
@@ -749,7 +731,6 @@ class Gate implements GateInterface
      * @param object|string $policy
      *
      * @throws ReflectionException
-     * @return mixed
      */
     protected function callPolicyMethod(object|string $policy, string $method, ?AuthenticatableInterface $user, array $arguments): mixed
     {
@@ -781,8 +762,6 @@ class Gate implements GateInterface
 
     /**
      * Resolve the user from the user resolver.
-     *
-     * @return mixed
      */
     protected function resolveUser(): mixed
     {

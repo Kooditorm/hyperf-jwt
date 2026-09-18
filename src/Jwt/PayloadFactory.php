@@ -19,18 +19,11 @@ use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
 class PayloadFactory
 {
     /**
-     * The claim factory.
-     *
-     * @var ClaimFactory
-     */
-    protected $claimFactory;
-
-    /**
      * The default claims.
      *
-     * @var array
+     * @var list<string>
      */
-    protected $defaultClaims = [
+    protected array $defaultClaims = [
         'iss',
         'iat',
         'exp',
@@ -38,9 +31,8 @@ class PayloadFactory
         'jti',
     ];
 
-    public function __construct(ClaimFactory $claimFactory)
+    public function __construct(protected readonly ClaimFactory $claimFactory)
     {
-        $this->claimFactory = $claimFactory;
     }
 
     /**
@@ -53,10 +45,8 @@ class PayloadFactory
 
     /**
      * Set the default claims to be added to the Payload.
-     *
-     * @return $this
      */
-    public function setDefaultClaims(array $claims)
+    public function setDefaultClaims(array $claims): static
     {
         $this->defaultClaims = $claims;
 
@@ -66,7 +56,7 @@ class PayloadFactory
     /**
      * Get the default claims.
      *
-     * @return string[]
+     * @return list<string>
      */
     public function getDefaultClaims(): array
     {
@@ -75,10 +65,8 @@ class PayloadFactory
 
     /**
      * Helper to set the ttl.
-     *
-     * @return $this
      */
-    public function setTtl(int $ttl)
+    public function setTtl(int $ttl): static
     {
         $this->claimFactory->setTtl($ttl);
 
@@ -90,7 +78,7 @@ class PayloadFactory
      */
     public function getTtl(): int
     {
-        return $this->claimFactory->getTtl();
+        return (int) $this->claimFactory->getTtl();
     }
 
     /**
@@ -102,7 +90,7 @@ class PayloadFactory
         $defaultClaims = $this->getDefaultClaims();
 
         // remove the exp claim if it exists and the ttl is null
-        if ($this->claimFactory->getTtl() === null and $key = array_search('exp', $defaultClaims)) {
+        if ($this->claimFactory->getTtl() === null && $key = array_search('exp', $defaultClaims, true)) {
             unset($defaultClaims[$key]);
         }
 

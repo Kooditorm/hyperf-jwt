@@ -13,14 +13,11 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Jwt\Contracts\RequestParser;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Hyperf\HttpServer\Request;
 
 interface HandlerInterface
 {
     /**
      * Parse the request.
-     *
-     * @param Request|ServerRequestInterface $request
      */
     public function parse(ServerRequestInterface $request): ?string;
 }

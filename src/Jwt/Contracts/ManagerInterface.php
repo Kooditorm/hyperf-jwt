@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Contracts;
 
+use Kooditorm\Hyperf\Jwt\Exceptions\JwtException;
+use Kooditorm\Hyperf\Jwt\Exceptions\TokenBlacklistedException;
 use Kooditorm\Hyperf\Jwt\Payload;
 use Kooditorm\Hyperf\Jwt\Token;
 
@@ -25,22 +27,22 @@ interface ManagerInterface
     /**
      * Decode a Token and return the Payload.
      *
-     * @throws \Kooditorm\Hyperf\Jwt\Exceptions\TokenBlacklistedException
+     * @throws TokenBlacklistedException
      */
     public function decode(Token $token, bool $checkBlacklist = true): Payload;
 
     /**
      * Refresh a Token and return a new Token.
      *
-     * @throws \Kooditorm\Hyperf\Jwt\Exceptions\TokenBlacklistedException
-     * @throws \Kooditorm\Hyperf\Jwt\Exceptions\JwtException
+     * @throws TokenBlacklistedException
+     * @throws JwtException
      */
     public function refresh(Token $token, bool $forceForever = false): Token;
 
     /**
      * Invalidate a Token by adding it to the blacklist.
      *
-     * @throws \Kooditorm\Hyperf\Jwt\Exceptions\JwtException
+     * @throws JwtException
      */
     public function invalidate(Token $token, bool $forceForever = false): bool;
 }

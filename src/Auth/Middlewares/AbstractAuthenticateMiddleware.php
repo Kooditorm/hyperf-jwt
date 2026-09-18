@@ -22,27 +22,21 @@ use Psr\Http\Server\RequestHandlerInterface;
 abstract class AbstractAuthenticateMiddleware implements MiddlewareInterface
 {
     /**
-     * The authentication factory instance.
-     *
-     * @var AuthManagerInterface
-     */
-    protected $auth;
-
-    /**
      * Create a new middleware instance.
      */
-    public function __construct(AuthManagerInterface $auth)
+    public function __construct(protected readonly AuthManagerInterface $auth)
     {
-        $this->auth = $auth;
     }
 
     /**
      * {@inheritdoc}
+     *
      * @throws AuthenticationException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $this->authenticate($request, $this->guards());
+
         return $handler->handle($request);
     }
 
@@ -60,11 +54,14 @@ abstract class AbstractAuthenticateMiddleware implements MiddlewareInterface
         foreach ($guards as $guard) {
             if ($this->auth->guard($guard)->check()) {
                 $this->auth->shouldUse($guard);
+
                 return;
             }
         }
 
-        ! $this->passable() and $this->unauthenticated($request, $guards);
+        if (! $this->passable()) {
+            $this->unauthenticated($request, $guards);
+        }
     }
 
     /**
@@ -102,7 +99,7 @@ abstract class AbstractAuthenticateMiddleware implements MiddlewareInterface
     /**
      * Get guard names.
      *
-     * @return string[]
+     * @return list<string>
      */
     abstract protected function guards(): array;
 }

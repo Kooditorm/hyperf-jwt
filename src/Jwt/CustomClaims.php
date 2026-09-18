@@ -16,17 +16,13 @@ trait CustomClaims
 {
     /**
      * Custom claims.
-     *
-     * @var array
      */
-    protected $customClaims = [];
+    protected array $customClaims = [];
 
     /**
      * Set the custom claims.
-     *
-     * @return $this
      */
-    public function setCustomClaims(array $customClaims)
+    public function setCustomClaims(array $customClaims): static
     {
         $this->customClaims = $customClaims;
 

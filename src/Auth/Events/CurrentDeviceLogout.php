@@ -18,24 +18,20 @@ class CurrentDeviceLogout
 {
     /**
      * The authentication guard name.
-     *
-     * @var string
      */
-    public $guard;
+    public string $guard;
 
     /**
      * The authenticated user.
-     *
-     * @var AuthenticatableInterface
      */
-    public $user;
+    public AuthenticatableInterface $user;
 
     /**
      * Create a new event instance.
      */
     public function __construct(string $guard, AuthenticatableInterface $user)
     {
-        $this->user = $user;
         $this->guard = $guard;
+        $this->user = $user;
     }
 }

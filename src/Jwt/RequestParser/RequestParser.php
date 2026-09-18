@@ -12,18 +12,19 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\RequestParser;
 
-use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\RequestParserInterface;
 use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\HandlerInterface;
+use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\RequestParserInterface;
 use Psr\Http\Message\ServerRequestInterface;
+
 class RequestParser implements RequestParserInterface
 {
     /**
-     * @var HandlerInterface
+     * @var array<int, HandlerInterface>
      */
-    private $handlers;
+    private array $handlers;
 
     /**
-     * @param HandlerInterface $handlers
+     * @param array<int, HandlerInterface> $handlers
      */
     public function __construct(array $handlers = [])
     {
@@ -35,7 +36,7 @@ class RequestParser implements RequestParserInterface
         return $this->handlers;
     }
 
-    public function setHandlers(array $handlers)
+    public function setHandlers(array $handlers): static
     {
         $this->handlers = $handlers;
 
@@ -49,6 +50,7 @@ class RequestParser implements RequestParserInterface
                 return $token;
             }
         }
+
         return null;
     }
 

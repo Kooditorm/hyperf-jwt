@@ -15,9 +15,10 @@ namespace Kooditorm\Hyperf\Auth\Contracts\Access;
 interface Authorizable
 {
     /**
-     * Determine if the entity has a given ability.
+     * Determine if the entity has the given abilities.
      *
+     * @param iterable|string $abilities
      * @param array|mixed $arguments
      */
-    public function can(string $ability, $arguments = []): bool;
+    public function can(iterable|string $abilities, mixed $arguments = []): bool;
 }

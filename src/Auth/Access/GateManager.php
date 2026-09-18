@@ -13,8 +13,6 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth\Access;
 
 use Hyperf\Contract\ConfigInterface;
-use Hyperf\Di\Annotation\AnnotationCollector;
-use Kooditorm\Hyperf\Auth\Annotations\Policy;
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateInterface;
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
@@ -67,9 +65,6 @@ class GateManager implements GateManagerInterface
             },
         ]);
 
-        $this->registerPoliciesByConfig();
-        $this->registerPoliciesByAnnotation();
-
         $this->eventDispatcher->dispatch(new GateManagerResolved($this));
     }
 
@@ -87,31 +82,5 @@ class GateManager implements GateManagerInterface
     public function getGate(): GateInterface
     {
         return $this->gate;
-    }
-
-    /**
-     * Register the application's policies by config.
-     */
-    protected function registerPoliciesByConfig(): void
-    {
-        $policies = (array) $this->config->get('auth.policies', []);
-
-        foreach ($policies as $model => $policy) {
-            $this->gate->policy((string) $model, (string) $policy);
-        }
-    }
-
-    /**
-     * Register the application's policies by annotation.
-     */
-    protected function registerPoliciesByAnnotation(): void
-    {
-        $policies = (array) AnnotationCollector::getClassesByAnnotation(Policy::class);
-
-        foreach ($policies as $policy => $annotation) {
-            foreach ((array) ($annotation->models ?? []) as $model) {
-                $this->gate->policy((string) $model, (string) $policy);
-            }
-        }
     }
 }

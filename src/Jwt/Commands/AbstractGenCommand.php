@@ -15,22 +15,17 @@ namespace Kooditorm\Hyperf\Jwt\Commands;
 use Hyperf\Command\Command as HyperfCommand;
 use Hyperf\Contract\ConfigInterface;
 use Symfony\Component\Console\Input\InputOption;
+
 class AbstractGenCommand extends HyperfCommand
 {
-    /**
-     * @var ConfigInterface
-     */
-    protected $config;
+    protected string $description = '';
 
-    protected string $description;
-
-    public function __construct(ConfigInterface $config)
+    public function __construct(protected readonly ConfigInterface $config)
     {
         parent::__construct();
-        $this->config = $config;
     }
 
-    public function configure()
+    public function configure(): void
     {
         parent::configure();
         $this->setDescription($this->description);
@@ -40,13 +35,12 @@ class AbstractGenCommand extends HyperfCommand
     }
 
     /**
-     * @param null|mixed $default
-     *
-     * @return null|mixed
+     * @return mixed
      */
-    protected function getOption(string $name, $default = null)
+    protected function getOption(string $name, mixed $default = null)
     {
         $result = $this->input->getOption($name);
+
         return empty($result) ? $default : $result;
     }
 

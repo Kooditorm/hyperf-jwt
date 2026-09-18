@@ -12,40 +12,28 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Claims;
 
-
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Contract\Arrayable;
 use Hyperf\Contract\Jsonable;
 use JsonSerializable;
 use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
 use Kooditorm\Hyperf\Jwt\Contracts\ManagerInterface;
-use Kooditorm\Hyperf\Jwt\Claims\Factory;
 
 class AbstractClaim implements ClaimInterface, Arrayable, Jsonable, JsonSerializable
 {
     /**
      * The claim name.
-     *
-     * @var string
      */
-    protected $name;
+    protected string $name = '';
 
     /**
      * The claim value.
-     *
-     * @var mixed
      */
-    private $value;
+    private mixed $value = null;
 
-    /**
-     * @var Factory
-     */
-    private $factory;
+    private ?Factory $factory = null;
 
-    /**
-     * @param mixed $value
-     */
-    public function __construct($value)
+    public function __construct(mixed $value)
     {
         $this->setValue($value);
     }
@@ -61,11 +49,9 @@ class AbstractClaim implements ClaimInterface, Arrayable, Jsonable, JsonSerializ
     /**
      * Set the claim value, and call a validate method.
      *
-     * @param mixed $value
-     *
      * @return $this
      */
-    public function setValue($value)
+    public function setValue(mixed $value)
     {
         $this->value = $this->validateCreate($value);
 
@@ -104,10 +90,8 @@ class AbstractClaim implements ClaimInterface, Arrayable, Jsonable, JsonSerializ
 
     /**
      * Validate the claim in a standalone Claim context.
-     *
-     * @param mixed $value
      */
-    public function validateCreate($value)
+    public function validateCreate(mixed $value)
     {
         return $value;
     }
@@ -122,10 +106,8 @@ class AbstractClaim implements ClaimInterface, Arrayable, Jsonable, JsonSerializ
 
     /**
      * Checks if the value matches the claim.
-     *
-     * @param mixed $value
      */
-    public function matches($value, bool $strict = true): bool
+    public function matches(mixed $value, bool $strict = true): bool
     {
         return $strict ? $this->value === $value : $this->value == $value;
     }
@@ -156,9 +138,12 @@ class AbstractClaim implements ClaimInterface, Arrayable, Jsonable, JsonSerializ
 
     protected function getFactory(): Factory
     {
-        if (! empty($this->factory)) {
+        if ($this->factory !== null) {
             return $this->factory;
         }
-        return $this->factory = ApplicationContext::getContainer()->get(ManagerInterface::class)->getClaimFactory();
+
+        return $this->factory = ApplicationContext::getContainer()
+            ->get(ManagerInterface::class)
+            ->getClaimFactory();
     }
 }

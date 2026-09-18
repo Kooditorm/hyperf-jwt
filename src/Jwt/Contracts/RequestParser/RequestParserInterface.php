@@ -12,21 +12,22 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Jwt\Contracts\RequestParser;
 
-use Psr\Http\Message\ServerRequestInterface;
 use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\HandlerInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
 interface RequestParserInterface
 {
     /**
      * Get the parser chain.
      *
-     * @return HandlerInterface
+     * @return array<int, HandlerInterface>
      */
     public function getHandlers(): array;
 
     /**
      * Set the order of the parser chain.
      *
-     * @param HandlerInterface $handlers
+     * @param array<int, HandlerInterface> $handlers
      *
      * @return $this
      */

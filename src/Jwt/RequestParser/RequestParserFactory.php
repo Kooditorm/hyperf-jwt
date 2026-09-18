@@ -17,11 +17,11 @@ use Kooditorm\Hyperf\Jwt\RequestParser\Handlers\Cookies;
 use Kooditorm\Hyperf\Jwt\RequestParser\Handlers\InputSource;
 use Kooditorm\Hyperf\Jwt\RequestParser\Handlers\QueryString;
 use Kooditorm\Hyperf\Jwt\RequestParser\Handlers\RouteParams;
-
 use function Hyperf\Support\make;
+
 class RequestParserFactory
 {
-    public function __invoke()
+    public function __invoke(): RequestParser
     {
         return make(RequestParser::class)->setHandlers([
             new AuthHeaders(),

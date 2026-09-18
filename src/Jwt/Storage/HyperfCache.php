@@ -17,39 +17,25 @@ use Psr\SimpleCache\CacheInterface;
 
 class HyperfCache implements StorageInterface
 {
-    /**
-     * The cache repository contract.
-     *
-     * @var CacheInterface
-     */
-    protected $cache;
-
-    /**
-     * The used cache tag.
-     *
-     * @var string
-     */
-    protected $tag;
-
-    /**
-     * Constructor.
-     */
-    public function __construct(CacheInterface $cache, string $tag)
-    {
-        $this->cache = $cache;
-        $this->tag = $tag;
+    public function __construct(
+        protected readonly CacheInterface $cache,
+        protected readonly string $tag
+    ) {
     }
 
-    public function add(string $key, $value, int $ttl)
+    public function add(string $key, mixed $value, int $ttl): void
     {
         $this->cache->set($this->resolveKey($key), $value, $ttl);
     }
 
-    public function forever(string $key, $value)
+    public function forever(string $key, mixed $value): void
     {
         $this->cache->set($this->resolveKey($key), $value);
     }
 
+    /**
+     * @return mixed
+     */
     public function get(string $key)
     {
         return $this->cache->get($this->resolveKey($key));
@@ -72,7 +58,7 @@ class HyperfCache implements StorageInterface
         return $this->cache;
     }
 
-    protected function resolveKey(string $key)
+    protected function resolveKey(string $key): string
     {
         return $this->tag . '.' . $key;
     }

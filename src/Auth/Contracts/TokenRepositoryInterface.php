@@ -12,29 +12,27 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Auth\Contracts;
 
-use Kooditorm\Hyperf\Auth\Contracts\CanResetPasswordInterface as CanResetPasswordContract;
-
 interface TokenRepositoryInterface
 {
     /**
      * Create a new token.
      */
-    public function create(CanResetPasswordContract $user): string;
+    public function create(CanResetPasswordInterface $user): string;
 
     /**
      * Determine if a token record exists and is valid.
      */
-    public function exists(CanResetPasswordContract $user, string $token): bool;
+    public function exists(CanResetPasswordInterface $user, string $token): bool;
 
     /**
      * Determine if the given user recently created a password reset token.
      */
-    public function recentlyCreatedToken(CanResetPasswordContract $user): bool;
+    public function recentlyCreatedToken(CanResetPasswordInterface $user): bool;
 
     /**
      * Delete a token record.
      */
-    public function delete(CanResetPasswordContract $user): void;
+    public function delete(CanResetPasswordInterface $user): void;
 
     /**
      * Delete expired tokens.

@@ -18,45 +18,28 @@ use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\PasswordBrokerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\PasswordBrokerManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\TokenRepositoryInterface;
+use Kooditorm\Hyperf\Auth\Events\PasswordReset;
 use Psr\Container\ContainerInterface;
 use function Hyperf\Support\make;
 
 class PasswordBrokerManager implements PasswordBrokerManagerInterface
 {
-    /**
-     * The container instance.
-     *
-     * @var ContainerInterface
-     */
-    protected $container;
+    protected AuthManagerInterface $auth;
+
+    protected ConfigInterface $config;
 
     /**
-     * The config instance.
+     * The array of created "brokers".
      *
-     * @var ConfigInterface
+     * @var array<string, PasswordBrokerInterface>
      */
-    protected $config;
-
-    /**
-     * The auth manager instance.
-     *
-     * @var AuthManagerInterface
-     */
-    protected $auth;
-
-    /**
-     * The array of created "drivers".
-     *
-     * @var array
-     */
-    protected $brokers = [];
+    protected array $brokers = [];
 
     /**
      * Create a new PasswordBroker manager instance.
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(protected readonly ContainerInterface $container)
     {
-        $this->container = $container;
         $this->auth = $container->get(AuthManagerInterface::class);
         $this->config = $container->get(ConfigInterface::class);
     }
@@ -92,7 +75,7 @@ class PasswordBrokerManager implements PasswordBrokerManagerInterface
     /**
      * Resolve the given broker.
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function resolve(string $name): PasswordBrokerInterface
     {

@@ -12,15 +12,14 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Auth\Events;
 
-
 use Kooditorm\Hyperf\Auth\Contracts\Access\GateManagerInterface;
 
 class GateManagerResolved
 {
     /**
-     * @var GateManagerInterface
+     * The gate manager instance.
      */
-    public $gate;
+    public GateManagerInterface $gate;
 
     /**
      * Create a new event instance.

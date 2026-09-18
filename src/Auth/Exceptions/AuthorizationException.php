@@ -20,17 +20,13 @@ class AuthorizationException extends Exception
 {
     /**
      * The response from the gate.
-     *
-     * @var \Kooditorm\Hyperf\Auth\Access\Response
      */
-    protected $response;
+    protected ?Response $response = null;
 
     /**
      * Create a new authorization exception instance.
-     *
-     * @param mixed $code
      */
-    public function __construct(?string $message = null, $code = null, Throwable $previous = null)
+    public function __construct(?string $message = null, mixed $code = null, ?Throwable $previous = null)
     {
         parent::__construct($message ?? 'This action is unauthorized.', 0, $previous);
 
@@ -40,17 +36,15 @@ class AuthorizationException extends Exception
     /**
      * Get the response from the gate.
      */
-    public function getResponse(): Response
+    public function getResponse(): ?Response
     {
         return $this->response;
     }
 
     /**
      * Set the response from the gate.
-     *
-     * @return $this
      */
-    public function setResponse(Response $response)
+    public function setResponse(Response $response): self
     {
         $this->response = $response;
 
@@ -62,6 +56,6 @@ class AuthorizationException extends Exception
      */
     public function toResponse(): Response
     {
-        return Response::deny($this->message, $this->code);
+        return Response::deny($this->message, (int) $this->code);
     }
 }

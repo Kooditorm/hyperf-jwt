@@ -22,10 +22,9 @@ class IssuedAt extends AbstractClaim
         validateCreate as commonValidateCreate;
     }
 
+    protected string $name = 'iat';
 
-    protected $name = 'iat';
-
-    public function validateCreate($value)
+    public function validateCreate(mixed $value)
     {
         $this->commonValidateCreate($value);
 
@@ -43,7 +42,8 @@ class IssuedAt extends AbstractClaim
         }
 
         if (
-            ($refreshTtl = $this->getFactory()->getRefreshTtl()) !== null && $this->isPast($value + $refreshTtl)
+            ($refreshTtl = $this->getFactory()->getRefreshTtl()) !== null
+            && $this->isPast($value + $refreshTtl)
         ) {
             throw new TokenExpiredException('Token has expired and can no longer be refreshed');
         }

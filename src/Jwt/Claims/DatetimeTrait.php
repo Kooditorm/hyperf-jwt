@@ -21,21 +21,17 @@ trait DatetimeTrait
 {
     /**
      * Time leeway in seconds.
-     *
-     * @var int
      */
-    protected $leeway = 0;
+    protected int $leeway = 0;
 
     /**
      * Set the claim value, and call a validate method.
      *
-     * @param mixed $value
-     *
-     * @throws \Kooditorm\Hyperf\Jwt\Exceptions\InvalidClaimException
+     * @throws InvalidClaimException
      *
      * @return $this
      */
-    public function setValue($value)
+    public function setValue(mixed $value)
     {
         if ($value instanceof DateInterval) {
             $value = Utils::now()->add($value);
@@ -51,7 +47,7 @@ trait DatetimeTrait
     /**
      * {@inheritdoc}
      */
-    public function validateCreate($value)
+    public function validateCreate(mixed $value)
     {
         if (! is_numeric($value)) {
             throw new InvalidClaimException($this);
@@ -62,10 +58,8 @@ trait DatetimeTrait
 
     /**
      * Set the leeway in seconds.
-     *
-     * @return $this
      */
-    public function setLeeway(int $leeway)
+    public function setLeeway(int $leeway): static
     {
         $this->leeway = $leeway;
 
@@ -74,20 +68,16 @@ trait DatetimeTrait
 
     /**
      * Determine whether the value is in the future.
-     *
-     * @param mixed $value
      */
-    protected function isFuture($value): bool
+    protected function isFuture(mixed $value): bool
     {
         return Utils::isFuture((int) $value, (int) $this->leeway);
     }
 
     /**
      * Determine whether the value is in the past.
-     *
-     * @param mixed $value
      */
-    protected function isPast($value): bool
+    protected function isPast(mixed $value): bool
     {
         return Utils::isPast((int) $value, (int) $this->leeway);
     }

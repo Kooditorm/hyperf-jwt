@@ -24,7 +24,7 @@ interface AuthenticatableInterface
      *
      * @return mixed
      */
-    public function getAuthIdentifier();
+    public function getAuthIdentifier(): mixed;
 
     /**
      * Get the password for the user.
@@ -38,8 +38,10 @@ interface AuthenticatableInterface
 
     /**
      * Set the token value for the "remember me" session.
+     *
+     * @return void
      */
-    public function setRememberToken(string $value);
+    public function setRememberToken(string $value): void;
 
     /**
      * Get the column name for the "remember me" token.

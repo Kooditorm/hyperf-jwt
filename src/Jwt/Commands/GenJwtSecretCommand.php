@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Jwt\Commands;
 
 use Hyperf\Stringable\Str;
+
 class GenJwtSecretCommand extends AbstractGenCommand
 {
     protected ?string $name = 'gen:jwt-secret';
@@ -25,11 +26,13 @@ class GenJwtSecretCommand extends AbstractGenCommand
 
         if ($this->getOption('show')) {
             $this->comment($key);
+
             return;
         }
 
         if (file_exists($path = $this->envFilePath()) === false) {
             $this->displayKey($key);
+
             return;
         }
 
@@ -38,11 +41,13 @@ class GenJwtSecretCommand extends AbstractGenCommand
         } else {
             if ($this->getOption('always-no')) {
                 $this->comment('Secret key already exists. Skipping...');
+
                 return;
             }
 
             if ($this->isConfirmed() === false) {
                 $this->comment('Phew... No changes were made to your secret key.');
+
                 return;
             }
 
@@ -63,7 +68,7 @@ class GenJwtSecretCommand extends AbstractGenCommand
 
     protected function isConfirmed(): bool
     {
-        return $this->getOption('force') ? true : $this->confirm(
+        return (bool) $this->getOption('force') || $this->confirm(
             'Are you sure you want to override the key? This will invalidate all existing tokens.'
         );
     }

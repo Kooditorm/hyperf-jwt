@@ -13,7 +13,6 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth\Guards;
 
 use Hyperf\Context\ApplicationContext;
-use Hyperf\Contract\ContainerInterface;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Macroable\Macroable;
 use InvalidArgumentException;
@@ -24,10 +23,12 @@ use Kooditorm\Hyperf\Auth\GuardHelpers;
 use Kooditorm\Hyperf\Jwt\Contracts\JwtSubjectInterface;
 use Kooditorm\Hyperf\Jwt\Exceptions\JwtException;
 use Kooditorm\Hyperf\Jwt\Jwt;
+use Psr\Container\ContainerInterface;
 
 class JwtGuard implements StatelessGuardInterface
 {
-    use GuardHelpers, Macroable {
+    use GuardHelpers;
+    use Macroable {
         __call as macroCall;
     }
 
@@ -35,32 +36,19 @@ class JwtGuard implements StatelessGuardInterface
      * The name of the Guard. Typically "jwt".
      *
      * Corresponds to guard name in authentication configuration.
-     *
-     * @var string
      */
-    protected $name;
+    protected string $name;
 
     /**
      * The user we last attempted to retrieve.
-     *
-     * @var AuthenticatableInterface|null
      */
-    protected $lastAttempted;
+    protected ?AuthenticatableInterface $lastAttempted = null;
 
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
+    protected ContainerInterface $container;
 
-    /**
-     * @var Jwt
-     */
-    protected $jwt;
+    protected Jwt $jwt;
 
-    /**
-     * @var RequestInterface
-     */
-    protected $request;
+    protected RequestInterface $request;
 
     /**
      * Create a new authentication guard.
@@ -115,9 +103,9 @@ class JwtGuard implements StatelessGuardInterface
     /**
      * Attempt to authenticate the user using the given credentials and return the token.
      *
-     * @return bool|string
+     * @return bool|string the token when logging in, otherwise a boolean state
      */
-    public function attempt(array $credentials = [], bool $login = true)
+    public function attempt(array $credentials = [], bool $login = true): bool|string
     {
         $this->lastAttempted = $user = $this->provider->retrieveByCredentials($credentials);
 
@@ -145,11 +133,11 @@ class JwtGuard implements StatelessGuardInterface
     /**
      * Log a user into the application, create a token for the user.
      *
-     * @return string
+     * @return string the freshly issued token
      *
-     * @throws InvalidArgumentException When the user does not implement JwtSubjectInterface.
+     * @throws InvalidArgumentException when the user does not implement JwtSubjectInterface
      */
-    public function login(AuthenticatableInterface $user)
+    public function login(AuthenticatableInterface $user): string
     {
         if (! $user instanceof JwtSubjectInterface) {
             throw new InvalidArgumentException(
@@ -169,11 +157,9 @@ class JwtGuard implements StatelessGuardInterface
     /**
      * Log the given user ID into the application.
      *
-     * @param mixed $id
-     *
-     * @return bool|string
+     * @return bool|string the token when found, otherwise false
      */
-    public function loginUsingId($id)
+    public function loginUsingId(mixed $id): bool|string
     {
         if (! is_null($user = $this->provider->retrieveById($id))) {
             return $this->login($user);
@@ -184,10 +170,8 @@ class JwtGuard implements StatelessGuardInterface
 
     /**
      * Log the given user ID into the application without sessions or cookies.
-     *
-     * @param mixed $id
      */
-    public function onceUsingId($id): bool
+    public function onceUsingId(mixed $id): bool
     {
         if (! is_null($user = $this->provider->retrieveById($id))) {
             $this->setUser($user);
@@ -201,7 +185,7 @@ class JwtGuard implements StatelessGuardInterface
     /**
      * Log the user out of the application, thus invalidating the token.
      */
-    public function logout(bool $forceForever = false)
+    public function logout(bool $forceForever = false): void
     {
         try {
             $this->jwt->invalidate($forceForever);
@@ -215,20 +199,16 @@ class JwtGuard implements StatelessGuardInterface
 
     /**
      * Refresh the token.
-     *
-     * @return string
      */
-    public function refresh(bool $forceForever = false)
+    public function refresh(bool $forceForever = false): string
     {
         return $this->jwt->refresh($forceForever);
     }
 
     /**
      * Invalidate the token.
-     *
-     * @return Jwt
      */
-    public function invalidate(bool $forceForever = false)
+    public function invalidate(bool $forceForever = false): Jwt
     {
         return $this->jwt->invalidate($forceForever);
     }

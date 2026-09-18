@@ -13,27 +13,24 @@ declare(strict_types=1);
 namespace Kooditorm\Hyperf\Auth\UserProviders;
 
 use Hyperf\Contract\Arrayable;
+use Hyperf\Database\Model\Model;
 use Hyperf\Stringable\Str;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 use Kooditorm\Hyperf\Auth\Contracts\UserProviderInterface;
-use Kooditorm\Hyperf\Hash\Contract\DriverInterface as HasherInterface;
+use Kooditorm\Hyperf\Hash\Contract\DriverInterface;
 use Kooditorm\Hyperf\Hash\Contract\HashInterface;
 
 class ModelUserProvider implements UserProviderInterface
 {
     /**
      * The hasher implementation.
-     *
-     * @var HashInterface
      */
-    protected $hasher;
+    protected DriverInterface $hasher;
 
     /**
-     * The Eloquent user model.
-     *
-     * @var string
+     * The Eloquent user model class name.
      */
-    protected $model;
+    protected string $model;
 
     /**
      * Create a new database user provider.
@@ -41,7 +38,7 @@ class ModelUserProvider implements UserProviderInterface
     public function __construct(HashInterface $hash, array $options)
     {
         $this->model = $options['model'] ?? null;
-        $this->hasher = ($hasher = $options['hash_driver'] ?? null) instanceof HasherInterface
+        $this->hasher = ($hasher = $options['hash_driver'] ?? null) instanceof DriverInterface
             ? $hasher
             : $hash->getDriver($hasher);
     }
@@ -49,11 +46,9 @@ class ModelUserProvider implements UserProviderInterface
     /**
      * Retrieve a user by their unique identifier.
      *
-     * @param mixed $identifier
-     *
-     * @return null|\Hyperf\Database\Model\Model|AuthenticatableInterface
+     * @return null|AuthenticatableInterface|Model
      */
-    public function retrieveById($identifier): ?AuthenticatableInterface
+    public function retrieveById(mixed $identifier): ?AuthenticatableInterface
     {
         $model = $this->createModel();
 
@@ -65,11 +60,9 @@ class ModelUserProvider implements UserProviderInterface
     /**
      * Retrieve a user by their unique identifier and "remember me" token.
      *
-     * @param mixed $identifier
-     *
-     * @return null|\Hyperf\Database\Model\Model|AuthenticatableInterface
+     * @return null|AuthenticatableInterface|Model
      */
-    public function retrieveByToken($identifier, string $token): ?AuthenticatableInterface
+    public function retrieveByToken(mixed $identifier, string $token): ?AuthenticatableInterface
     {
         $model = $this->createModel();
 
@@ -84,14 +77,13 @@ class ModelUserProvider implements UserProviderInterface
 
         $rememberToken = $retrievedModel->getRememberToken();
 
-        return $rememberToken && hash_equals($rememberToken, $token)
-            ? $retrievedModel : null;
+        return $rememberToken && hash_equals($rememberToken, $token) ? $retrievedModel : null;
     }
 
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param \Hyperf\Database\Model\Model|AuthenticatableInterface $user
+     * @param AuthenticatableInterface|Model $user
      */
     public function updateRememberToken(AuthenticatableInterface $user, string $token): void
     {
@@ -109,13 +101,14 @@ class ModelUserProvider implements UserProviderInterface
     /**
      * Retrieve a user by the given credentials.
      *
-     * @return null|\Hyperf\Database\Model\Model|AuthenticatableInterface
+     * @return null|AuthenticatableInterface|Model
      */
     public function retrieveByCredentials(array $credentials): ?AuthenticatableInterface
     {
-        if (empty($credentials) ||
-            (count($credentials) === 1 &&
-                Str::contains($this->firstCredentialKey($credentials), 'password'))) {
+        if (
+            empty($credentials)
+            || (count($credentials) === 1 && Str::contains($this->firstCredentialKey($credentials), 'password'))
+        ) {
             return null;
         }
 
@@ -144,15 +137,13 @@ class ModelUserProvider implements UserProviderInterface
      */
     public function validateCredentials(AuthenticatableInterface $user, array $credentials): bool
     {
-        $plain = $credentials['password'];
-
-        return $this->hasher->check($plain, $user->getAuthPassword());
+        return $this->hasher->check($credentials['password'], $user->getAuthPassword());
     }
 
     /**
      * Create a new instance of the model.
      *
-     * @return null|\Hyperf\Database\Model\Model|AuthenticatableInterface
+     * @return AuthenticatableInterface|Model
      */
     public function createModel()
     {
@@ -171,10 +162,8 @@ class ModelUserProvider implements UserProviderInterface
 
     /**
      * Sets the hasher implementation.
-     *
-     * @return $this
      */
-    public function setHashInterface(HashInterface $hasher)
+    public function setHashInterface(HashInterface $hasher): static
     {
         $this->hasher = $hasher;
 
@@ -191,10 +180,8 @@ class ModelUserProvider implements UserProviderInterface
 
     /**
      * Sets the name of the Eloquent user model.
-     *
-     * @return $this
      */
-    public function setModel(string $model)
+    public function setModel(string $model): static
     {
         $this->model = $model;
 
@@ -206,19 +193,17 @@ class ModelUserProvider implements UserProviderInterface
      */
     protected function firstCredentialKey(array $credentials): ?string
     {
-        foreach ($credentials as $key => $value) {
-            return $key;
-        }
-        return null;
+        $key = array_key_first($credentials);
+
+        return $key === null ? null : (string) $key;
     }
 
     /**
      * Get a new query builder for the model instance.
      *
-     * @param null|\Hyperf\Database\Model\Model|AuthenticatableInterface $model
-     * @return \Hyperf\Database\Model\Builder
+     * @param null|AuthenticatableInterface|Model $model
      */
-    protected function newModelQuery($model = null)
+    protected function newModelQuery(?Model $model = null)
     {
         return is_null($model)
             ? $this->createModel()->newQuery()

@@ -16,24 +16,18 @@ class Attempting
 {
     /**
      * The authentication guard name.
-     *
-     * @var string
      */
-    public $guard;
+    public string $guard;
 
     /**
      * The credentials for the user.
-     *
-     * @var array
      */
-    public $credentials;
+    public array $credentials;
 
     /**
      * Indicates if the user should be "remembered".
-     *
-     * @var bool
      */
-    public $remember;
+    public bool $remember;
 
     /**
      * Create a new event instance.
@@ -41,7 +35,7 @@ class Attempting
     public function __construct(string $guard, array $credentials, bool $remember)
     {
         $this->guard = $guard;
-        $this->remember = $remember;
         $this->credentials = $credentials;
+        $this->remember = $remember;
     }
 }

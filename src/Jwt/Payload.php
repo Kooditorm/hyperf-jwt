@@ -30,15 +30,10 @@ class Payload implements ArrayAccess, Arrayable, Countable, Jsonable, JsonSerial
 {
     /**
      * The collection of claims.
-     *
-     * @var Collection
      */
-    private $claims;
+    private Collection $claims;
 
-    /**
-     * @var PayloadValidatorInterface
-     */
-    private $validator;
+    private PayloadValidatorInterface $validator;
 
     /**
      * Build the Payload.
@@ -60,11 +55,9 @@ class Payload implements ArrayAccess, Arrayable, Countable, Jsonable, JsonSerial
     /**
      * Invoke the Payload as a callable function.
      *
-     * @param mixed $claim
-     *
      * @return mixed
      */
-    public function __invoke($claim = null)
+    public function __invoke(mixed $claim = null)
     {
         return $this->get($claim);
     }
@@ -79,7 +72,7 @@ class Payload implements ArrayAccess, Arrayable, Countable, Jsonable, JsonSerial
     {
         if (preg_match('/get(.+)\b/i', $method, $matches)) {
             foreach ($this->claims as $claim) {
-                if (get_class($claim) === 'Kooditorm\Hyperf\\Jwt\\Claims\\' . $matches[1]) {
+                if (get_class($claim) === 'Kooditorm\Hyperf\Jwt\Claims\\' . $matches[1]) {
                     return $claim->getValue();
                 }
             }
@@ -108,7 +101,7 @@ class Payload implements ArrayAccess, Arrayable, Countable, Jsonable, JsonSerial
         $claims = $this->getClaims();
 
         foreach ($values as $key => $value) {
-            if (! $claims->has($key) or ! $claims->get($key)->matches($value, $strict)) {
+            if (! $claims->has($key) || ! $claims->get($key)->matches($value, $strict)) {
                 return false;
             }
         }
@@ -127,11 +120,9 @@ class Payload implements ArrayAccess, Arrayable, Countable, Jsonable, JsonSerial
     /**
      * Get the payload.
      *
-     * @param mixed $claim
-     *
      * @return mixed
      */
-    public function get($claim = null)
+    public function get(mixed $claim = null)
     {
         $claim = value($claim);
 
@@ -196,22 +187,16 @@ class Payload implements ArrayAccess, Arrayable, Countable, Jsonable, JsonSerial
 
     /**
      * Determine if an item exists at an offset.
-     *
-     * @param mixed $key
      */
-    public function offsetExists($key): bool
+    public function offsetExists(mixed $key): bool
     {
         return Arr::has($this->toArray(), $key);
     }
 
     /**
      * Get an item at a given offset.
-     *
-     * @param mixed $key
-     *
-     * @return mixed
      */
-    public function offsetGet($key): mixed
+    public function offsetGet(mixed $key): mixed
     {
         return Arr::get($this->toArray(), $key);
     }
@@ -219,12 +204,9 @@ class Payload implements ArrayAccess, Arrayable, Countable, Jsonable, JsonSerial
     /**
      * Don't allow changing the payload as it should be immutable.
      *
-     * @param mixed $key
-     * @param mixed $value
-     *
-     * @throws \Kooditorm\Hyperf\Jwt\Exceptions\PayloadException
+     * @throws PayloadException
      */
-    public function offsetSet($key, $value): void
+    public function offsetSet(mixed $key, mixed $value): void
     {
         throw new PayloadException('The payload is immutable');
     }
@@ -232,11 +214,9 @@ class Payload implements ArrayAccess, Arrayable, Countable, Jsonable, JsonSerial
     /**
      * Don't allow changing the payload as it should be immutable.
      *
-     * @param string $key
-     *
-     * @throws \Kooditorm\Hyperf\Jwt\Exceptions\PayloadException
+     * @throws PayloadException
      */
-    public function offsetUnset($key): void
+    public function offsetUnset(mixed $key): void
     {
         throw new PayloadException('The payload is immutable');
     }
@@ -248,21 +228,4 @@ class Payload implements ArrayAccess, Arrayable, Countable, Jsonable, JsonSerial
     {
         return count($this->toArray());
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

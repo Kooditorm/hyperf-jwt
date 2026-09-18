@@ -16,9 +16,8 @@ interface StatefulGuardInterface extends GuardInterface
 {
     /**
      * Attempt to authenticate a user using the given credentials.
-     * @return bool|mixed
      */
-    public function attempt(array $credentials = [], bool $remember = false);
+    public function attempt(array $credentials = [], bool $remember = false): bool;
 
     /**
      * Log a user into the application without sessions or cookies.
@@ -27,29 +26,26 @@ interface StatefulGuardInterface extends GuardInterface
 
     /**
      * Log a user into the application.
-     *
-     * @param \Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface $user
-     * @return mixed|void
      */
-    public function login(AuthenticatableInterface $user, bool $remember = false);
+    public function login(AuthenticatableInterface $user, bool $remember = false): void;
 
     /**
      * Log the given user ID into the application.
      *
      * @param mixed $id
-     *
-     * @return \Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface
+     * @param bool $remember
+     * @return AuthenticatableInterface|null
      */
-    public function loginUsingId($id, bool $remember = false): ?AuthenticatableInterface;
+    public function loginUsingId(mixed $id, bool $remember = false): ?AuthenticatableInterface;
 
     /**
      * Log the given user ID into the application without sessions or cookies.
      *
      * @param mixed $id
      *
-     * @return bool|\Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface
+     * @return bool|AuthenticatableInterface
      */
-    public function onceUsingId($id);
+    public function onceUsingId(mixed $id): AuthenticatableInterface|bool;
 
     /**
      * Determine if the user was authenticated via "remember me" cookie.
@@ -58,7 +54,6 @@ interface StatefulGuardInterface extends GuardInterface
 
     /**
      * Log the user out of the application.
-     * @return mixed|void
      */
-    public function logout();
+    public function logout(): void;
 }

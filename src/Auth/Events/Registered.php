@@ -17,11 +17,9 @@ use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 class Registered
 {
     /**
-     * The authenticated user.
-     *
-     * @var AuthenticatableInterface
+     * The registered user.
      */
-    public $user;
+    public AuthenticatableInterface $user;
 
     /**
      * Create a new event instance.

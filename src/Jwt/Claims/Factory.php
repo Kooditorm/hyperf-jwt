@@ -16,37 +16,30 @@ use Hyperf\Context\ApplicationContext;
 use Hyperf\Stringable\Str;
 use Kooditorm\Hyperf\Jwt\Contracts\ClaimInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use function Hyperf\Support\make;
 
 class Factory
 {
     /**
      * The TTL.
-     *
-     * @var null|int
      */
-    protected $ttl;
+    protected ?int $ttl = null;
 
     /**
      * The refresh TTL.
-     *
-     * @var null|int
      */
-    protected $refreshTtl;
+    protected ?int $refreshTtl = null;
 
     /**
      * Time leeway in seconds.
-     *
-     * @var int
      */
-    protected $leeway;
+    protected int $leeway = 0;
 
     /**
      * The classes map.
      *
-     * @var array
+     * @var array<string, class-string<AbstractClaim>>
      */
-    private $classMap = [
+    private array $classMap = [
         'aud' => Audience::class,
         'exp' => Expiration::class,
         'iat' => IssuedAt::class,
@@ -65,10 +58,8 @@ class Factory
 
     /**
      * Get the instance of the claim when passing the name and value.
-     *
-     * @param mixed $value
      */
-    public function get(string $name, $value): ClaimInterface
+    public function get(string $name, mixed $value): ClaimInterface
     {
         if ($this->has($name)) {
             $claim = make($this->classMap[$name], ['factory' => $this, 'value' => $value]);
@@ -99,10 +90,8 @@ class Factory
 
     /**
      * Add a new claim mapping.
-     *
-     * @return $this
      */
-    public function extend(string $name, string $classPath)
+    public function extend(string $name, string $classPath): static
     {
         $this->classMap[$name] = $classPath;
 
@@ -111,10 +100,8 @@ class Factory
 
     /**
      * Set the token ttl (in seconds).
-     *
-     * @return $this
      */
-    public function setTtl(?int $ttl)
+    public function setTtl(?int $ttl): static
     {
         $this->ttl = $ttl === null ? null : (int) $ttl;
 
@@ -131,10 +118,8 @@ class Factory
 
     /**
      * Set the token refresh ttl (in seconds).
-     *
-     * @return $this
      */
-    public function setRefreshTtl(?int $refreshTtl)
+    public function setRefreshTtl(?int $refreshTtl): static
     {
         $this->refreshTtl = $refreshTtl === null ? null : (int) $refreshTtl;
 
@@ -151,10 +136,8 @@ class Factory
 
     /**
      * Set the leeway in seconds.
-     *
-     * @return $this
      */
-    public function setLeeway(int $leeway)
+    public function setLeeway(int $leeway): static
     {
         $this->leeway = $leeway;
 
@@ -173,7 +156,7 @@ class Factory
 
     public function exp(): int
     {
-        return time() + $this->getTtl();
+        return time() + (int) $this->getTtl();
     }
 
     public function nbf(): int

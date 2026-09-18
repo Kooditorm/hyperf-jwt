@@ -14,7 +14,6 @@ namespace Kooditorm\Hyperf\Jwt\RequestParser\Handlers;
 
 use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\HandlerInterface as ParserContract;
 use Psr\Http\Message\ServerRequestInterface;
-
 use function Hyperf\Collection\data_get;
 
 class QueryString implements ParserContract
@@ -24,6 +23,7 @@ class QueryString implements ParserContract
     public function parse(ServerRequestInterface $request): ?string
     {
         $data = data_get($request->getQueryParams(), $this->key);
-        return empty($data) === null ? null : (string) $data;
+
+        return empty($data) ? null : (string) $data;
     }
 }

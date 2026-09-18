@@ -19,31 +19,23 @@ class Argon2iDriver extends AbstractDriver implements DriverInterface
 {
     /**
      * The default memory cost factor.
-     *
-     * @var int
      */
-    protected $memory = 1024;
+    protected int $memory = 1024;
 
     /**
      * The default time cost factor.
-     *
-     * @var int
      */
-    protected $time = 2;
+    protected int $time = 2;
 
     /**
      * The default threads factor.
-     *
-     * @var int
      */
-    protected $threads = 2;
+    protected int $threads = 2;
 
     /**
      * Indicates whether to perform an algorithm check.
-     *
-     * @var bool
      */
-    protected $verifyAlgorithm = false;
+    protected bool $verifyAlgorithm = false;
 
     /**
      * Create a new driver instance.
@@ -59,7 +51,7 @@ class Argon2iDriver extends AbstractDriver implements DriverInterface
     /**
      * Hash the given value.
      *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function make(string $value, array $options = []): string
     {
@@ -79,7 +71,7 @@ class Argon2iDriver extends AbstractDriver implements DriverInterface
     /**
      * Check the given plain value against a hash.
      *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function check(string $value, string $hashedValue, array $options = []): bool
     {
@@ -104,8 +96,6 @@ class Argon2iDriver extends AbstractDriver implements DriverInterface
 
     /**
      * Set the default password memory factor.
-     *
-     * @return $this
      */
     public function setMemory(int $memory): self
     {
@@ -116,8 +106,6 @@ class Argon2iDriver extends AbstractDriver implements DriverInterface
 
     /**
      * Set the default password timing factor.
-     *
-     * @return $this
      */
     public function setTime(int $time): self
     {
@@ -128,8 +116,6 @@ class Argon2iDriver extends AbstractDriver implements DriverInterface
 
     /**
      * Set the default password threads factor.
-     *
-     * @return $this
      */
     public function setThreads(int $threads): self
     {
@@ -140,10 +126,8 @@ class Argon2iDriver extends AbstractDriver implements DriverInterface
 
     /**
      * Get the algorithm that should be used for hashing.
-     *
-     * @return int
      */
-    protected function algorithm()
+    protected function algorithm(): int
     {
         return PASSWORD_ARGON2I;
     }

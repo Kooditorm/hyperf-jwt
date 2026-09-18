@@ -18,32 +18,26 @@ class Failed
 {
     /**
      * The authentication guard name.
-     *
-     * @var string
      */
-    public $guard;
+    public string $guard;
 
     /**
      * The user the attempter was trying to authenticate as.
-     *
-     * @var null|AuthenticatableInterface
      */
-    public $user;
+    public ?AuthenticatableInterface $user;
 
     /**
      * The credentials provided by the attempter.
-     *
-     * @var array
      */
-    public $credentials;
+    public array $credentials;
 
     /**
      * Create a new event instance.
      */
     public function __construct(string $guard, ?AuthenticatableInterface $user, array $credentials)
     {
-        $this->user = $user;
         $this->guard = $guard;
+        $this->user = $user;
         $this->credentials = $credentials;
     }
 }

@@ -18,10 +18,8 @@ class Lockout
 {
     /**
      * The throttled request.
-     *
-     * @var ServerRequestInterface
      */
-    public $request;
+    public ServerRequestInterface $request;
 
     /**
      * Create a new event instance.

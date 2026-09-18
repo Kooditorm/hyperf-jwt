@@ -22,57 +22,21 @@ use Kooditorm\Hyperf\Jwt\Exceptions\TokenBlacklistedException;
 class Manager implements ManagerInterface
 {
     /**
-     * The JWT codec interface.
-     *
-     * @var CodecInterface
-     */
-    protected $codec;
-
-    /**
-     * The blacklist interface.
-     *
-     * @var Blacklist
-     */
-    protected $blacklist;
-
-    /**
-     * the claim factory.
-     *
-     * @var Factory
-     */
-    protected $claimFactory;
-
-    /**
-     * the payload factory.
-     *
-     * @var PayloadFactory
-     */
-    protected $payloadFactory;
-
-    /**
      * The blacklist flag.
-     *
-     * @var bool
      */
-    protected $blacklistEnabled = true;
+    protected bool $blacklistEnabled = true;
 
     /**
-     * the persistent claims.
-     *
-     * @var array
+     * The persistent claims.
      */
-    protected $persistentClaims = [];
+    protected array $persistentClaims = [];
 
     public function __construct(
-        CodecInterface $codec,
-        Blacklist $blacklist,
-        ClaimFactory $claimFactory,
-        PayloadFactory $payloadFactory
+        protected readonly CodecInterface $codec,
+        protected readonly Blacklist $blacklist,
+        protected readonly ClaimFactory $claimFactory,
+        protected readonly PayloadFactory $payloadFactory
     ) {
-        $this->codec = $codec;
-        $this->blacklist = $blacklist;
-        $this->claimFactory = $claimFactory;
-        $this->payloadFactory = $payloadFactory;
     }
 
     /**
@@ -80,9 +44,7 @@ class Manager implements ManagerInterface
      */
     public function encode(Payload $payload): Token
     {
-        $token = $this->codec->encode($payload->get());
-
-        return new Token($token);
+        return new Token($this->codec->encode($payload->get()));
     }
 
     /**
@@ -94,7 +56,7 @@ class Manager implements ManagerInterface
     {
         $payload = $this->payloadFactory->make($this->codec->decode($token->get()), $ignoreExpired);
 
-        if ($checkBlacklist and $this->blacklistEnabled and $this->blacklist->has($payload)) {
+        if ($checkBlacklist && $this->blacklistEnabled && $this->blacklist->has($payload)) {
             throw new TokenBlacklistedException('The token has been blacklisted');
         }
 
@@ -173,10 +135,8 @@ class Manager implements ManagerInterface
 
     /**
      * Set whether the blacklist is enabled.
-     *
-     * @return $this
      */
-    public function setBlacklistEnabled(bool $enabled)
+    public function setBlacklistEnabled(bool $enabled): static
     {
         $this->blacklistEnabled = $enabled;
 
@@ -185,10 +145,8 @@ class Manager implements ManagerInterface
 
     /**
      * Set the claims to be persisted when refreshing a token.
-     *
-     * @return $this
      */
-    public function setPersistentClaims(array $claims)
+    public function setPersistentClaims(array $claims): static
     {
         $this->persistentClaims = $claims;
 
@@ -205,12 +163,8 @@ class Manager implements ManagerInterface
 
     /**
      * Build the claims to go into the refreshed token.
-     *
-     * @param Payload $payload
-     *
-     * @return array
      */
-    protected function buildRefreshClaims(Payload $payload)
+    protected function buildRefreshClaims(Payload $payload): array
     {
         // Get the claims to be persisted from the payload
         $persistentClaims = Arr::only($payload->toArray(), $this->persistentClaims);

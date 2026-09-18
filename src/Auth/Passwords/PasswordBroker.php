@@ -23,26 +23,12 @@ use UnexpectedValueException;
 class PasswordBroker implements PasswordBrokerInterface
 {
     /**
-     * The password token repository.
-     *
-     * @var TokenRepositoryInterface
-     */
-    protected $tokens;
-
-    /**
-     * The user provider implementation.
-     *
-     * @var UserProviderInterface
-     */
-    protected $users;
-
-    /**
      * Create a new password broker instance.
      */
-    public function __construct(TokenRepositoryInterface $tokens, UserProviderInterface $users)
-    {
-        $this->users = $users;
-        $this->tokens = $tokens;
+    public function __construct(
+        protected readonly TokenRepositoryInterface $tokens,
+        protected readonly UserProviderInterface $users
+    ) {
     }
 
     /**
@@ -75,17 +61,15 @@ class PasswordBroker implements PasswordBrokerInterface
 
     /**
      * Reset the password for the given token.
-     *
-     * @return mixed
      */
-    public function reset(array $credentials, Closure $callback)
+    public function reset(array $credentials, Closure $callback): string
     {
         $user = $this->validateReset($credentials);
 
         // If the responses from the validate method is not a user instance, we will
         // assume that it is a redirect and simply return it from this method and
         // the user is properly redirected having an error message on the post.
-        if (!$user instanceof CanResetPasswordInterface) {
+        if (! $user instanceof CanResetPasswordInterface) {
             return $user;
         }
 
@@ -104,7 +88,7 @@ class PasswordBroker implements PasswordBrokerInterface
     /**
      * Get the user for the given credentials.
      *
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      */
     public function getUser(array $credentials): ?CanResetPasswordInterface
     {
@@ -112,7 +96,7 @@ class PasswordBroker implements PasswordBrokerInterface
 
         $user = $this->users->retrieveByCredentials($credentials);
 
-        if ($user && !$user instanceof CanResetPasswordInterface) {
+        if ($user && ! $user instanceof CanResetPasswordInterface) {
             throw new UnexpectedValueException('User must implement CanResetPassword interface.');
         }
 
@@ -153,16 +137,14 @@ class PasswordBroker implements PasswordBrokerInterface
 
     /**
      * Validate a password reset for the given credentials.
-     *
-     * @return CanResetPasswordInterface|string
      */
-    protected function validateReset(array $credentials)
+    protected function validateReset(array $credentials): CanResetPasswordInterface|string
     {
         if (is_null($user = $this->getUser($credentials))) {
             return static::INVALID_USER;
         }
 
-        if (!$this->tokens->exists($user, $credentials['token'])) {
+        if (! $this->tokens->exists($user, $credentials['token'])) {
             return static::INVALID_TOKEN;
         }
 

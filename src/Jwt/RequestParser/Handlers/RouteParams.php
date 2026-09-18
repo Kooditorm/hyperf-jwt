@@ -14,15 +14,11 @@ namespace Kooditorm\Hyperf\Jwt\RequestParser\Handlers;
 
 use Kooditorm\Hyperf\Jwt\Contracts\RequestParser\HandlerInterface as ParserContract;
 use Psr\Http\Message\ServerRequestInterface;
-use Hyperf\HttpServer\Request;
 
 class RouteParams implements ParserContract
 {
     use KeyTrait;
 
-    /**
-     * @param Request|ServerRequestInterface $request
-     */
     public function parse(ServerRequestInterface $request): ?string
     {
         return $request->route($this->key);

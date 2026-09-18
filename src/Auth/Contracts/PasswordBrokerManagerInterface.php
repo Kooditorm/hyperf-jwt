@@ -12,12 +12,21 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Auth\Contracts;
 
+/**
+ * Calls that are not declared on the manager are forwarded to the default broker.
+ *
+ * @method string sendResetLink(array $credentials)
+ * @method string reset(array $credentials, \Closure $callback)
+ * @method null|CanResetPasswordInterface getUser(array $credentials)
+ * @method string createToken(CanResetPasswordInterface $user)
+ * @method void deleteToken(CanResetPasswordInterface $user)
+ * @method bool tokenExists(CanResetPasswordInterface $user, string $token)
+ * @method TokenRepositoryInterface getRepository()
+ */
 interface PasswordBrokerManagerInterface
 {
     /**
      * Get a password broker instance by name.
-     *
-     * @return mixed
      */
-    public function broker(?string $name = null);
+    public function broker(?string $name = null): PasswordBrokerInterface;
 }

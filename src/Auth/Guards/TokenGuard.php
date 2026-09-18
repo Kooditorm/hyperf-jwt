@@ -23,45 +23,30 @@ class TokenGuard implements GuardInterface
 {
     use GuardHelpers;
 
-
-    /**
-     * The request instance.
-     *
-     * @var \Psr\Http\Message\ServerRequestInterface
-     */
-    protected $request;
-
     /**
      * The name of the query string item from the request containing the API token.
-     *
-     * @var string
      */
-    protected $inputKey;
+    protected string $inputKey;
 
     /**
      * The name of the token "column" in persistent storage.
-     *
-     * @var string
      */
-    protected $storageKey;
+    protected string $storageKey;
 
     /**
      * Indicates if the API token is hashed in storage.
-     *
-     * @var bool
      */
-    protected $hash = false;
+    protected bool $hash = false;
 
     /**
      * Create a new authentication guard.
      */
     public function __construct(
-        ServerRequestInterface $request,
+        protected ServerRequestInterface $request,
         UserProviderInterface $provider,
         string $name,
         array $options = []
     ) {
-        $this->request = $request;
         $this->provider = $provider;
         $this->inputKey = $options['input_key'] ?? 'api_token';
         $this->storageKey = $options['storage_key'] ?? 'api_token';
@@ -109,7 +94,7 @@ class TokenGuard implements GuardInterface
         }
 
         if (empty($token)) {
-            $token = $this->getBasicAuthorization()[1];
+            $token = $this->getBasicAuthorization()[1] ?? '';
         }
 
         return $token;
@@ -126,19 +111,13 @@ class TokenGuard implements GuardInterface
 
         $credentials = [$this->storageKey => $credentials[$this->inputKey]];
 
-        if ($this->provider->retrieveByCredentials($credentials)) {
-            return true;
-        }
-
-        return false;
+        return $this->provider->retrieveByCredentials($credentials) !== null;
     }
 
     /**
      * Set the current request instance.
-     *
-     * @return $this
      */
-    public function setRequest(ServerRequestInterface $request)
+    public function setRequest(ServerRequestInterface $request): static
     {
         $this->request = $request;
 
@@ -155,24 +134,23 @@ class TokenGuard implements GuardInterface
         if (Str::startsWith($header, 'Bearer ')) {
             return Str::substr($header, 7);
         }
+
         return null;
     }
 
     /**
-     * Get the bearer token from the request headers.
+     * Get the basic authorization credentials from the request headers.
      *
-     * @return string[]
+     * @return array{0: ?string, 1: ?string}
      */
     protected function getBasicAuthorization(): array
     {
-        $header = $this->request->header('Authorization');
+        $header = (string) $this->request->header('Authorization');
 
         if (Str::startsWith($header, 'Basic ')) {
-            try {
-                return explode(':', base64_decode(Str::substr($header, 6)));
-            } catch (\Throwable $throwable) {
-            }
+            return explode(':', base64_decode(Str::substr($header, 6)));
         }
+
         return [null, null];
     }
 }

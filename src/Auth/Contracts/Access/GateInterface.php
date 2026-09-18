@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Kooditorm\Hyperf\Auth\Contracts\Access;
 
+use InvalidArgumentException;
 use Kooditorm\Hyperf\Auth\Access\Response;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 use Kooditorm\Hyperf\Auth\Exceptions\AuthorizationException;
@@ -30,35 +31,35 @@ interface GateInterface
      *
      * @param callable|string $callback
      *
-     * @return $this
+     * @return static
      */
     public function define(string $ability, $callback);
 
     /**
      * Define abilities for a resource.
      *
-     * @return $this
+     * @return static
      */
     public function resource(string $name, string $class, ?array $abilities = null);
 
     /**
      * Define a policy class for a given class type.
      *
-     * @return $this
+     * @return static
      */
     public function policy(string $class, string $policy);
 
     /**
      * Register a callback to run before all Gate checks.
      *
-     * @return $this
+     * @return static
      */
     public function before(callable $callback);
 
     /**
      * Register a callback to run after all Gate checks.
      *
-     * @return $this
+     * @return static
      */
     public function after(callable $callback);
 
@@ -79,26 +80,23 @@ interface GateInterface
     /**
      * Determine if all of the given abilities should be granted for the current user.
      *
-     * @param iterable|string $abilities
      * @param array|mixed $arguments
      */
-    public function check($abilities, $arguments = []): bool;
+    public function check(iterable|string $abilities, $arguments = []): bool;
 
     /**
      * Determine if any one of the given abilities should be granted for the current user.
      *
-     * @param iterable|string $abilities
      * @param array|mixed $arguments
      */
-    public function any($abilities, $arguments = []): bool;
+    public function any(iterable|string $abilities, $arguments = []): bool;
 
     /**
      * Determine if all of the given abilities should be denied for the current user.
      *
-     * @param iterable|string $abilities
      * @param array|mixed $arguments
      */
-    public function none($abilities, $arguments = []): bool;
+    public function none(iterable|string $abilities, $arguments = []): bool;
 
     /**
      * Determine if the given ability should be granted for the current user.
@@ -124,20 +122,20 @@ interface GateInterface
      * @throws AuthorizationException
      * @return null|bool|Response
      */
-    public function raw(string $ability, $arguments = []);
+    public function raw(string $ability, $arguments = []): mixed;
 
     /**
      * Get a policy instance for a given class.
      *
      * @param object|string $class
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      * @return mixed
      */
-    public function getPolicyFor($class);
+    public function getPolicyFor($class): mixed;
 
     /**
-     * Get a guard instance for the given user.
+     * Get a gate instance for the given user.
      *
      * @return static
      */

@@ -17,7 +17,7 @@ interface StatelessGuardInterface extends GuardInterface
     /**
      * Attempt to authenticate the user using the given credentials and return the token.
      *
-     * @return bool|mixed
+     * @return bool|string the token when logging in, otherwise a boolean state
      */
     public function attempt(array $credentials = [], bool $login = true);
 
@@ -27,9 +27,9 @@ interface StatelessGuardInterface extends GuardInterface
     public function once(array $credentials = []): bool;
 
     /**
-     * Log a user into the application, create a token for the user.
+     * Log a user into the application and create a token for the user.
      *
-     * @return mixed
+     * @return string the freshly issued token
      */
     public function login(AuthenticatableInterface $user);
 
@@ -38,16 +38,16 @@ interface StatelessGuardInterface extends GuardInterface
      *
      * @param mixed $id
      *
-     * @return false|mixed
+     * @return bool|string the token when found, otherwise false
      */
-    public function loginUsingId($id);
+    public function loginUsingId(mixed $id);
 
     /**
      * Log the given user ID into the application without sessions or cookies.
      *
      * @param mixed $id
      */
-    public function onceUsingId($id): bool;
+    public function onceUsingId(mixed $id): bool;
 
     /**
      * Log the user out of the application, thus invalidating the token.
@@ -57,7 +57,7 @@ interface StatelessGuardInterface extends GuardInterface
     /**
      * Refresh the token.
      *
-     * @return mixed
+     * @return string
      */
     public function refresh(bool $forceForever = false);
 

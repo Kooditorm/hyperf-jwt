@@ -17,11 +17,9 @@ use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 class PasswordReset
 {
     /**
-     * The user.
-     *
-     * @var AuthenticatableInterface
+     * The user whose password has been reset.
      */
-    public $user;
+    public AuthenticatableInterface $user;
 
     /**
      * Create a new event instance.

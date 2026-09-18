@@ -16,26 +16,26 @@ use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Di\Aop\AbstractAspect;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
+use Hyperf\Di\Exception\Exception;
 use Kooditorm\Hyperf\Auth\Annotations\Auth;
+use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
 use Kooditorm\Hyperf\Auth\Contracts\AuthenticatableInterface;
 use Kooditorm\Hyperf\Auth\Exceptions\AuthenticationException;
-use Kooditorm\Hyperf\Auth\Contracts\AuthManagerInterface;
-
 
 #[Aspect]
-class AuthAspect extends  AbstractAspect
+class AuthAspect extends AbstractAspect
 {
-
     public array $annotations = [
         Auth::class,
     ];
 
-    /**
-     * @var AuthManagerInterface
-     */
     #[Inject]
     protected AuthManagerInterface $auth;
 
+    /**
+     * @throws AuthenticationException
+     * @throws Exception
+     */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
         $annotation = $proceedingJoinPoint->getAnnotationMetadata();
@@ -48,7 +48,7 @@ class AuthAspect extends  AbstractAspect
         foreach ($guards as $name) {
             $guard = $this->auth->guard($name);
 
-            if (!$passable && !$guard->user() instanceof AuthenticatableInterface) {
+            if (! $passable && ! $guard->user() instanceof AuthenticatableInterface) {
                 throw new AuthenticationException('Unauthenticated.', $guards);
             }
         }

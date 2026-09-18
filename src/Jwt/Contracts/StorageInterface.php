@@ -11,17 +11,12 @@ declare(strict_types=1);
  */
 
 namespace Kooditorm\Hyperf\Jwt\Contracts;
+
 interface StorageInterface
 {
-    /**
-     * @param mixed $value
-     */
-    public function add(string $key, $value, int $ttl);
+    public function add(string $key, mixed $value, int $ttl);
 
-    /**
-     * @param mixed $value
-     */
-    public function forever(string $key, $value);
+    public function forever(string $key, mixed $value);
 
     /**
      * @return mixed

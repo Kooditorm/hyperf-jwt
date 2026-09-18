@@ -24,6 +24,7 @@ class TokenValidator implements TokenValidatorInterface
     public function check(string $value): string
     {
         $this->validateStructure($value);
+
         return $value;
     }
 
@@ -44,7 +45,7 @@ class TokenValidator implements TokenValidatorInterface
     /**
      * @throws TokenInvalidException
      */
-    protected function validateStructure(string $token)
+    protected function validateStructure(string $token): static
     {
         $parts = explode('.', $token);
 
@@ -54,7 +55,7 @@ class TokenValidator implements TokenValidatorInterface
 
         $parts = array_filter(array_map('trim', $parts));
 
-        if (count($parts) !== 3 or implode('.', $parts) !== $token) {
+        if (count($parts) !== 3 || implode('.', $parts) !== $token) {
             throw new TokenInvalidException('Malformed token');
         }
 

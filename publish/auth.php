@@ -78,7 +78,7 @@ return [
                 'model' => App\User::class,
                 'hash_driver' => 'bcrypt',
             ],
-        ]
+        ],
     ],
 
     /*
