@@ -19,27 +19,27 @@ interface PasswordBrokerInterface
     /**
      * Constant representing a successfully sent reminder.
      */
-    const RESET_LINK_SENT = 'passwords.sent';
+    public const RESET_LINK_SENT = 'passwords.sent';
 
     /**
      * Constant representing a successfully reset password.
      */
-    const PASSWORD_RESET = 'passwords.reset';
+    public const PASSWORD_RESET = 'passwords.reset';
 
     /**
      * Constant representing the user not found response.
      */
-    const INVALID_USER = 'passwords.user';
+    public const INVALID_USER = 'passwords.user';
 
     /**
      * Constant representing an invalid token.
      */
-    const INVALID_TOKEN = 'passwords.token';
+    public const INVALID_TOKEN = 'passwords.token';
 
     /**
      * Constant representing a throttled reset attempt.
      */
-    const RESET_THROTTLED = 'passwords.throttled';
+    public const RESET_THROTTLED = 'passwords.throttled';
 
     /**
      * Send a password reset link to a user.
