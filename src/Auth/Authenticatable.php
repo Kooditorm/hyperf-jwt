@@ -46,7 +46,7 @@ trait Authenticatable
     /**
      * Determine whether the password should be checked when validating credentials.
      */
-    public function getCheckAuthPassword(): bool
+    public function getCheckAuthPassword(): ?bool
     {
         return $this->checkAuthPassword;
     }
