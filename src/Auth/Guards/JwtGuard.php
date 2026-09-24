@@ -23,7 +23,9 @@ use Kooditorm\Hyperf\Auth\GuardHelpers;
 use Kooditorm\Hyperf\Jwt\Contracts\JwtSubjectInterface;
 use Kooditorm\Hyperf\Jwt\Exceptions\JwtException;
 use Kooditorm\Hyperf\Jwt\Jwt;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class JwtGuard implements StatelessGuardInterface
 {
@@ -103,7 +105,11 @@ class JwtGuard implements StatelessGuardInterface
     /**
      * Attempt to authenticate the user using the given credentials and return the token.
      *
+     * @param array $credentials
+     * @param bool $login
      * @return bool|string the token when logging in, otherwise a boolean state
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function attempt(array $credentials = [], bool $login = true): bool|string
     {
@@ -133,21 +139,14 @@ class JwtGuard implements StatelessGuardInterface
     /**
      * Log a user into the application, create a token for the user.
      *
+     * @param AuthenticatableInterface $user
      * @return string the freshly issued token
      *
-     * @throws InvalidArgumentException when the user does not implement JwtSubjectInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function login(AuthenticatableInterface $user): string
     {
-        if (! $user instanceof JwtSubjectInterface) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'User [%s] must implement [%s].',
-                    get_class($user),
-                    JwtSubjectInterface::class
-                )
-            );
-        }
 
         $this->setUser($user);
 
@@ -184,21 +183,25 @@ class JwtGuard implements StatelessGuardInterface
 
     /**
      * Log the user out of the application, thus invalidating the token.
+     * @param bool $forceForever
+     * @throws ContainerExceptionInterface
+     * @throws JwtException
+     * @throws NotFoundExceptionInterface
      */
     public function logout(bool $forceForever = false): void
     {
-        try {
-            $this->jwt->invalidate($forceForever);
-        } catch (JwtException $e) {
-            // The token may already be invalid or missing; nothing to do.
-        }
-
+        $this->jwt->invalidate($forceForever);
         $this->user = null;
         $this->jwt->unsetToken();
     }
 
     /**
      * Refresh the token.
+     * @param bool $forceForever
+     * @return string
+     * @throws ContainerExceptionInterface
+     * @throws JwtException
+     * @throws NotFoundExceptionInterface
      */
     public function refresh(bool $forceForever = false): string
     {
@@ -207,9 +210,15 @@ class JwtGuard implements StatelessGuardInterface
 
     /**
      * Invalidate the token.
+     * @param bool $forceForever
+     * @return Jwt
+     * @throws JwtException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function invalidate(bool $forceForever = false): Jwt
     {
+
         return $this->jwt->invalidate($forceForever);
     }
 
@@ -218,6 +227,15 @@ class JwtGuard implements StatelessGuardInterface
      */
     protected function hasValidCredentials(?AuthenticatableInterface $user, array $credentials): bool
     {
-        return ! is_null($user) && $this->provider->validateCredentials($user, $credentials);
+        if (is_null($user)) {
+            return false;
+        }
+
+        // 关闭密码校验时（getCheckAuthPassword() 返回 false），跳过密码比对直接视为凭证有效
+        if (! $user->getCheckAuthPassword()) {
+            return true;
+        }
+
+        return $this->provider->validateCredentials($user, $credentials);
     }
 }

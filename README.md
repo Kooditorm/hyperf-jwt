@@ -655,7 +655,29 @@ $user = $provider->retrieveByCredentials(['email' => 'a@b.com']);
 $ok   = $provider->validateCredentials($user, ['password' => 'xxx']);
 ```
 
-模型需实现 `AuthenticatableInterface`，可直接引入 `Kooditorm\Hyperf\Auth\Authenticatable` trait（提供 `getAuthIdentifierName/getAuthIdentifier/getAuthPassword/getRememberToken/setRememberToken` 等方法）。
+模型需实现 `AuthenticatableInterface`，可直接引入 `Kooditorm\Hyperf\Auth\Authenticatable` trait（提供 `getAuthIdentifierName/getAuthIdentifier/getAuthPassword/getCheckAuthPassword/setCheckAuthPassword/getRememberToken/setRememberToken` 等方法）。
+
+#### 密码校验开关
+
+`AuthenticatableInterface` 要求实现 `getCheckAuthPassword()` 与 `setCheckAuthPassword()`，用于决定是否比对密码。`JwtGuard` 校验凭证时若 `getCheckAuthPassword()` 返回 `false`，将跳过密码比对（仍会按其他凭证查询用户），适用于免密登录、第三方登录等场景。
+
+引入 `Authenticatable` trait 后默认开启，可在模型中覆写：
+
+```php
+class User extends Model implements AuthenticatableInterface, JwtSubjectInterface
+{
+    use Authenticatable;
+
+    // 方式一：类级开关（整个模型免密）
+    protected bool $checkAuthPassword = false;
+
+    // 方式二：按记录开关（例如读数据库字段）
+    // public function getCheckAuthPassword(): bool
+    // {
+    //     return (bool) $this->password_check;
+    // }
+}
+```
 
 ### 中间件
 
@@ -988,6 +1010,8 @@ interface AuthenticatableInterface
     public function getAuthIdentifierName(): string;
     public function getAuthIdentifier();          // 主键值
     public function getAuthPassword(): string;    // 密码字段值
+    public function getCheckAuthPassword(): bool; // 密码校验开关（false 时跳过密码比对）
+    public function setCheckAuthPassword(bool $enable); // 设置密码校验开关
     public function getRememberToken(): ?string;
     public function setRememberToken(?string $value);
     public function getRememberTokenName(): string;

@@ -32,6 +32,21 @@ interface AuthenticatableInterface
     public function getAuthPassword(): ?string;
 
     /**
+     * Determine whether the password should be checked when validating credentials.
+     *
+     * @return bool
+     */
+    public function getCheckAuthPassword(): bool;
+
+    /**
+     * Set whether the password should be checked when validating credentials.
+     *
+     * @param bool $enable
+     * @return static
+     */
+    public function setCheckAuthPassword(bool $enable): static;
+
+    /**
      * Get the token value for the "remember me" session.
      */
     public function getRememberToken(): ?string;

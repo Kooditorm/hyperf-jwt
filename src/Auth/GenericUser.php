@@ -87,6 +87,24 @@ class GenericUser implements UserContract, JwtSubjectInterface
     }
 
     /**
+     * Determine whether the password should be checked when validating credentials.
+     */
+    public function getCheckAuthPassword(): bool
+    {
+        return (bool) ($this->attributes['check_auth_password'] ?? true);
+    }
+
+    /**
+     * Set whether the password should be checked when validating credentials.
+     */
+    public function setCheckAuthPassword(bool $enable): static
+    {
+        $this->attributes['check_auth_password'] = $enable;
+
+        return $this;
+    }
+
+    /**
      * Get the "remember me" token value.
      */
     public function getRememberToken(): ?string
