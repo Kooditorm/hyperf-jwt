@@ -20,6 +20,13 @@ trait Authenticatable
     protected string $rememberTokenName = 'remember_token';
 
     /**
+     * Determine whether the password should be checked when validating credentials.
+     *
+     * Set it to false on the model to skip the password verification (e.g. 免密登录 / 第三方登录场景).
+     */
+    protected bool $checkAuthPassword = true;
+
+    /**
      * Get the name of the unique identifier for the user.
      */
     public function getAuthIdentifierName(): string
@@ -46,7 +53,7 @@ trait Authenticatable
     /**
      * Determine whether the password should be checked when validating credentials.
      */
-    public function getCheckAuthPassword(): ?bool
+    public function getCheckAuthPassword(): bool
     {
         return $this->checkAuthPassword;
     }
@@ -60,6 +67,7 @@ trait Authenticatable
 
         return $this;
     }
+
 
     /**
      * Get the token value for the "remember me" session.
